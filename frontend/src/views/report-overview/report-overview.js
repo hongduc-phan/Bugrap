@@ -2,9 +2,10 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/vaadin-combo-box/src/vaadin-combo-box.js';
 import '@vaadin/vaadin-button/src/vaadin-button.js';
-import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
+import '@vaadin/vaadin-select/src/vaadin-select.js';
+import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 
 class ReportOverview extends PolymerElement {
 
@@ -40,23 +41,42 @@ background: none;">
  </vaadin-horizontal-layout>
  <vaadin-horizontal-layout theme="margin" style="width: 100%; display: flex; align-items:">
   <vaadin-horizontal-layout theme="margin" style="width: 50%; display: flex; align-items:">
-   <div style="margin-left:12px; font-size: 16px;
-    font-weight: 500; margin-right: 12px;">
+   <div style="margin-left:16px; font-size: 16px;
+    font-weight: 500; margin-right: 16px;">
      Report a bug 
    </div>
-   <div style="margin-left:12px; font-size: 16px;
-    font-weight: 500; margin-right: 12px;">
+   <div style="margin-left:16px; font-size: 16px;
+    font-weight: 500; margin-right: 16px;">
      Request a features 
    </div>
-   <div style="margin-left:12px; font-size: 16px;
-    font-weight: 500; margin-right: 12px;">
+   <div style="margin-left:16px; font-size: 16px;
+    font-weight: 500; margin-right: 16px;">
      Manage project 
    </div>
   </vaadin-horizontal-layout>
   <vaadin-horizontal-layout theme="margin" style="width: 50%; display: flex; align-items:center; justify-content: flex-end">
-   <vaadin-text-field placeholder="Search report..." style="width : 80%">
+   <vaadin-text-field placeholder="Search report..." style="width : 80%" id="search">
     <iron-icon icon="lumo:search" slot="prefix"></iron-icon>
    </vaadin-text-field>
+  </vaadin-horizontal-layout>
+ </vaadin-horizontal-layout>
+ <div style="width: 100%; height: 1px; background-color: black"></div>
+ <vaadin-horizontal-layout theme="margin" style="width: 100%; display: flex; flex-wrap: wrap">
+  <vaadin-horizontal-layout theme="margin" style="width: 100%; display:flex">
+   <vaadin-horizontal-layout theme="margin" style="width: 20%; align-items: center;justify-content: space-between">
+    <div style="margin-right: 16px">
+      Report for 
+    </div>
+    <vaadin-select style="width:70%;" id="select-project"></vaadin-select>
+   </vaadin-horizontal-layout>
+   <vaadin-horizontal-layout theme="margin" style="width:80%; display:flex; align-items: center; justify-content: flex-end;  border-radius: 10px;">
+    <vaadin-progress-bar style="width: 100%; height: 24px; color: grey" id="overview-project"></vaadin-progress-bar>
+   </vaadin-horizontal-layout>
+  </vaadin-horizontal-layout>
+  <vaadin-horizontal-layout theme="margin" style="width: 100%; padding: 8px">
+   <div>
+     Assignees 
+   </div>
   </vaadin-horizontal-layout>
  </vaadin-horizontal-layout>
 </vaadin-vertical-layout>
