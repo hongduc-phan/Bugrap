@@ -77,6 +77,18 @@ background: none;">
    <div>
      Assignees 
    </div>
+   <vaadin-button theme="" id="btn-onlyme" style="margin-left: 16px ;margin-right: -4px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px;">
+     Only me 
+   </vaadin-button>
+   <vaadin-button theme="" style="margin-left: -4px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px;" id="btn-everyone">
+     Everyone 
+   </vaadin-button>
+   <div style="padding-left: 40px; padding-right: 12px">
+     Status 
+   </div>
+   <vaadin-button style="margin-left: 16px ;margin-right: -20px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-open">Open</vaadin-button>
+   <vaadin-button style="margin-left: 16px ;margin-right: -20px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-allkinds">All kinds</vaadin-button>
+   <vaadin-button style="margin-left: 16px ;margin-right: -4px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-custom">Customs</vaadin-button>
   </vaadin-horizontal-layout>
  </vaadin-horizontal-layout>
 </vaadin-vertical-layout>
