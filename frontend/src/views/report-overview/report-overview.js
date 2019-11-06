@@ -6,6 +6,8 @@ import '@polymer/iron-icon/iron-icon.js';
 import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
 import '@vaadin/vaadin-select/src/vaadin-select.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/vaadin-split-layout/src/vaadin-split-layout.js';
+import '@vaadin/vaadin-grid/src/vaadin-grid.js';
 
 class ReportOverview extends PolymerElement {
 
@@ -86,10 +88,24 @@ background: none;">
    <div style="padding-left: 40px; padding-right: 12px">
      Status 
    </div>
-   <vaadin-button style="margin-left: 16px ;margin-right: -20px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-open">Open</vaadin-button>
-   <vaadin-button style="margin-left: 16px ;margin-right: -20px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-allkinds">All kinds</vaadin-button>
-   <vaadin-button style="margin-left: 16px ;margin-right: -4px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-custom">Customs</vaadin-button>
+   <vaadin-button style="margin-left: 16px ;margin-right: -20px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-open">
+    Open
+   </vaadin-button>
+   <vaadin-button style="margin-left: 16px ;margin-right: -20px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-allkinds">
+    All kinds
+   </vaadin-button>
+   <vaadin-button style="margin-left: 16px ;margin-right: -4px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-custom">
+    Customs
+   </vaadin-button>
   </vaadin-horizontal-layout>
+  <vaadin-split-layout orientation="vertical" style="width: 100%">
+   <div id="wrapper-table">
+    <vaadin-grid id="table" height-by-rows column-reordering-allowed></vaadin-grid>
+   </div>
+   <div id="wrapper-overview">
+    Bottom content element hahahahaha hahhahaahha hahahahahaha hahahahaah 
+   </div>
+  </vaadin-split-layout>
  </vaadin-horizontal-layout>
 </vaadin-vertical-layout>
 `;
