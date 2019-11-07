@@ -1,6 +1,8 @@
 package org.vaadin.harry.spring.views.reportoverview;
 
-public class Report {
+import java.io.Serializable;
+
+public class Report implements Serializable {
     private int priority;
     private String type;
     private String summary;
