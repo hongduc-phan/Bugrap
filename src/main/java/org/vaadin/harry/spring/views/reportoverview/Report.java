@@ -15,6 +15,19 @@ public class Report {
         this.lastModified = lastModified;
         this.time = time;
     }
+
+    @Override
+    public String toString() {
+        return "Report{" +
+                "priority=" + priority +
+                ", type='" + type + '\'' +
+                ", summary='" + summary + '\'' +
+                ", assign='" + assign + '\'' +
+                ", lastModified='" + lastModified + '\'' +
+                ", time='" + time + '\'' +
+                '}';
+    }
+
     public int getPriority() {
         return priority;
     }

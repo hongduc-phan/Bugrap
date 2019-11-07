@@ -89,14 +89,14 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         Table.addColumn(Report::getLastModified).setHeader("LAST MODIFIED").setWidth("140px");
         Table.addColumn(Report::getTime).setHeader("REPORTED").setWidth("140px");
         List<Report> reportList = new ArrayList<>();
-        reportList.add(new Report(3, "Bug", "1111111", "aaaaa", "", "15m ago"));
-        reportList.add(new Report(3, "Feature", "22222", "bbbbb", "", "15m ago"));
-        reportList.add(new Report(3, "Feature", "33333", "ccccc", "", "15m ago"));
-        reportList.add(new Report(3, "Bug", "44444", "dddddd", "", "15m ago"));
+        reportList.add(new Report(3, "Bug", "1111111", "aaaaa", "2012", "15m ago"));
+        reportList.add(new Report(3, "Feature", "22222", "bbbbb", "2013", "15m ago"));
+        reportList.add(new Report(3, "Feature", "33333", "ccccc", "2014", "15m ago"));
+        reportList.add(new Report(3, "Bug", "44444", "dddddd", "1011", "15m ago"));
         Table.setItems(reportList);
         //System.out.println( reportList);
-        Table.getSelectedItems();
-        System.out.println(Table.getSelectedItems());
+//        Table.getSelectedItems();
+//        System.out.println(Table.getSelectedItems());
         Table.setSelectionMode(Grid.SelectionMode.MULTI);
         Table.asMultiSelect().addValueChangeListener(event -> {
             String message = String.format("Selection changed from %s to %s",
