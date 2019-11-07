@@ -1,13 +1,17 @@
-package org.vaadin.harry.spring.views.reportoverview;
+package org.vaadin.harry.spring.data;
 
-public class Report {
+import java.io.Serializable;
+
+public class Report implements Serializable {
+    private int id;
     private int priority;
     private String type;
     private String summary;
     private String assign;
     private String lastModified;
     private String time;
-    public Report(int priority, String type, String summary, String assign, String lastModified, String time) {
+    public Report(int id, int priority, String type, String summary, String assign, String lastModified, String time) {
+        this.id = id;
         this.priority = priority;
         this.type = type;
         this.summary = summary;
@@ -15,6 +19,15 @@ public class Report {
         this.lastModified = lastModified;
         this.time = time;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getPriority() {
         return priority;
     }

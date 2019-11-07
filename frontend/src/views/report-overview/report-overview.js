@@ -5,9 +5,9 @@ import '@vaadin/vaadin-button/src/vaadin-button.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
 import '@vaadin/vaadin-select/src/vaadin-select.js';
-import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/vaadin-split-layout/src/vaadin-split-layout.js';
 import '@vaadin/vaadin-grid/src/vaadin-grid.js';
+import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 
 class ReportOverview extends PolymerElement {
 
@@ -89,13 +89,13 @@ background: none;">
      Status 
    </div>
    <vaadin-button style="margin-left: 16px ;margin-right: -20px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-open">
-    Open
+     Open 
    </vaadin-button>
    <vaadin-button style="margin-left: 16px ;margin-right: -20px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-allkinds">
-    All kinds
+     All kinds 
    </vaadin-button>
    <vaadin-button style="margin-left: 16px ;margin-right: -4px;border-radius: 6px; width: 32px; height: 16px; font-size: 10px; " id="btn-custom">
-    Customs
+     Customs 
    </vaadin-button>
   </vaadin-horizontal-layout>
   <vaadin-split-layout orientation="vertical" style="width: 100%">
@@ -103,7 +103,13 @@ background: none;">
     <vaadin-grid id="table" height-by-rows column-reordering-allowed></vaadin-grid>
    </div>
    <div id="wrapper-overview">
-    Bottom content element hahahahaha hahhahaahha hahahahahaha hahahahaah 
+    <vaadin-horizontal-layout theme="spacing" id="wrapper-info">
+     <div id="infos-report" style="width: 80%;">
+        Detail id: [[reportDetail.id]]<br/>
+        Report id: [[reportDetail.reportId]]<br/>
+        [[reportDetail.detail]] 
+    </div>
+    </vaadin-horizontal-layout>
    </div>
   </vaadin-split-layout>
  </vaadin-horizontal-layout>
@@ -115,11 +121,8 @@ background: none;">
         return 'report-overview';
     }
 
-    static get properties() {
-        return {
-            // Declare your properties here.
-        };
-    }
+
 }
+
 
 customElements.define(ReportOverview.is, ReportOverview);
