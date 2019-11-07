@@ -68,7 +68,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private  boolean isClicked_Everyone = false;
     private boolean isClicked_report = false;
     @Id("table")
-    private Grid<Report> Table;
+    private Grid<Report> gridTable;
     @Id("infos-report")
     private Element detailDiv;
 
@@ -76,7 +76,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
      * Creates a new ReportOverview.
      */
     public ReportOverview() {
-        if (Table.getSelectedItems().isEmpty()){
+        if (gridTable.getSelectedItems().isEmpty()){
             wrapperOverview.setVisible(false);
         }
 
@@ -94,25 +94,26 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         btnOnlyMe.addClickListener(this::showButtonClickedMessage_onlyMe);
         btnEveryOne.addClickListener(this::showButtonClickedMessage_everyone);
 
-        Table.addColumn(Report::getPriority).setHeader("PRIORITY");
-        Table.addColumn(Report::getType).setFlexGrow(0).setWidth("100px").setHeader("TYPE");
-        Table.addColumn(Report::getSummary).setHeader("SUMMARY");
-        Table.addColumn(Report::getAssign).setFlexGrow(0).setWidth("100px").setHeader("ASSIGNED TO");
-        Table.addColumn(Report::getLastModified).setHeader("LAST MODIFIED").setWidth("140px");
-        Table.addColumn(Report::getTime).setHeader("REPORTED").setWidth("140px");
+        gridTable.addColumn(Report::getPriority).setHeader("PRIORITY");
+        gridTable.addColumn(Report::getType).setFlexGrow(0).setWidth("100px").setHeader("TYPE");
+        gridTable.addColumn(Report::getSummary).setHeader("SUMMARY");
+        gridTable.addColumn(Report::getAssign).setFlexGrow(0).setWidth("100px").setHeader("ASSIGNED TO");
+        gridTable.addColumn(Report::getLastModified).setHeader("LAST MODIFIED").setWidth("140px");
+        gridTable.addColumn(Report::getTime).setHeader("REPORTED").setWidth("140px");
 
-        Table.setItems(Reports.getReports());
+        gridTable.setItems(Reports.getReports());
         //System.out.println( reportList);
 //        Table.getSelectedItems();
 //        System.out.println(Table.getSelectedItems());
-        Table.setSelectionMode(Grid.SelectionMode.MULTI);
-        Table.asMultiSelect().addValueChangeListener(this::clickRow);
+        gridTable.setSelectionMode(Grid.SelectionMode.MULTI);
+        gridTable.asMultiSelect().addValueChangeListener(this::clickRow);
     }
 
     private void clickRow(AbstractField.ComponentValueChangeEvent<Grid<Report>, Set<Report>> gridSetComponentValueChangeEvent) {
-            System.out.println(Table.getSelectedItems());
-            if (Table.getSelectedItems().isEmpty()){
+            System.out.println(gridTable.getSelectedItems());
+            if (gridTable.getSelectedItems().isEmpty()){
                 wrapperOverview.setVisible(false);
+                return;
             }
             else {
                 wrapperOverview.setVisible(true);
@@ -126,7 +127,12 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         if (data.size() == 1) {
             Optional<ReportDetail> detail = ReportDetails.getReportDetail(data.get(0).getId());
-            detail.ifPresent(reportDetail -> detailDiv.setText(reportDetail.getDetail()));
+//            detail.ifPresent(reportDetail -> detailDiv.setText(reportDetail.getDetail()));
+            detail.ifPresent(rd -> getModel().setReportDetail(rd));
+        }
+        else {
+            // ask to handle whether in frontend or java server side
+            wrapperOverview.setVisible(false);
         }
 
         System.out.println(data);
@@ -178,6 +184,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     public interface ReportOverviewModel extends TemplateModel {
         // Add setters and getters for template properties here.
         public void setPersons(List<Report> data);
+        public void setReportDetail(ReportDetail detail);
     }
 
 }

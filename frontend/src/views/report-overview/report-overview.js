@@ -104,7 +104,11 @@ background: none;">
    </div>
    <div id="wrapper-overview">
     <vaadin-horizontal-layout theme="spacing" id="wrapper-info">
-     <div id="infos-report" style="width: 80%;"></div>
+     <div id="infos-report" style="width: 80%;">
+        Detail id: [[reportDetail.id]]<br/>
+        Report id: [[reportDetail.reportId]]<br/>
+        [[reportDetail.detail]] 
+    </div>
     </vaadin-horizontal-layout>
    </div>
   </vaadin-split-layout>
