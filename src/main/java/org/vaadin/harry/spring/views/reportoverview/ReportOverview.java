@@ -6,8 +6,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.polymertemplate.Id;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.select.Select;
@@ -19,6 +17,10 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
+import org.vaadin.harry.spring.data.Report;
+import org.vaadin.harry.spring.data.ReportDetail;
+import org.vaadin.harry.spring.data.ReportDetails;
+import org.vaadin.harry.spring.data.Reports;
 
 import java.util.*;
 
@@ -68,7 +70,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     @Id("table")
     private Grid<Report> Table;
     @Id("infos-report")
-    private Element div;
+    private Element detailDiv;
 
     /**
      * Creates a new ReportOverview.
@@ -98,12 +100,8 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         Table.addColumn(Report::getAssign).setFlexGrow(0).setWidth("100px").setHeader("ASSIGNED TO");
         Table.addColumn(Report::getLastModified).setHeader("LAST MODIFIED").setWidth("140px");
         Table.addColumn(Report::getTime).setHeader("REPORTED").setWidth("140px");
-        List<Report> reportList = new ArrayList<>();
-        reportList.add(new Report(3, "Bug", "1111111", "aaaaa", "2012", "15m ago"));
-        reportList.add(new Report(3, "Feature", "22222", "bbbbb", "2013", "15m ago"));
-        reportList.add(new Report(3, "Feature", "33333", "ccccc", "2014", "15m ago"));
-        reportList.add(new Report(3, "Bug", "44444", "dddddd", "1011", "15m ago"));
-        Table.setItems(reportList);
+
+        Table.setItems(Reports.getReports());
         //System.out.println( reportList);
 //        Table.getSelectedItems();
 //        System.out.println(Table.getSelectedItems());
@@ -123,8 +121,13 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         Set<Report> reportSet =  gridSetComponentValueChangeEvent.getValue();
 
-        data = Arrays.asList(reportSet.toArray(new Report[reportSet.size()]));
+        data = Arrays.asList(reportSet.toArray(new Report[0]));
         getModel().setPersons(data);
+
+        if (data.size() == 1) {
+            Optional<ReportDetail> detail = ReportDetails.getReportDetail(data.get(0).getId());
+            detail.ifPresent(reportDetail -> detailDiv.setText(reportDetail.getDetail()));
+        }
 
         System.out.println(data);
 //        while (data.hasNext()) {

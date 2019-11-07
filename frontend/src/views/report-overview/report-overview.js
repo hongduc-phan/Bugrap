@@ -117,35 +117,8 @@ background: none;">
         return 'report-overview';
     }
 
-    static get properties() {
-        return {
-            // Declare your properties here.
-            persons: {
-                observer: "_activeItemChanged",
-            }
-        };
-    }
 
-    _activeItemChanged (items) {
-        //this.$.list.selectedItems = item ? [item] : [];
-        // console.log(this.$)
-        console.log(items);
-        if (items) {
-            items.map(i => {
-                this.$['infos-report'].innerHTML += `<div style="display:flex; justify-content:space-between; padding-bottom: 16px; padding-top: 16pxd "> 
-    <div>  ${i.priority}</div>
-    <div>  ${i.assign}</div>
-    <div>  ${i.lastModified}</div>
-    <div>  ${i.summary}</div>
-    <div>  ${i.time}</div>
-    <div>  ${i.type}</div>
-</div>`
-
-            })
-        }
-
-
-    }
 }
+
 
 customElements.define(ReportOverview.is, ReportOverview);
