@@ -2,11 +2,18 @@ package org.vaadin.harry.spring.views.reportoverview;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.polymertemplate.Id;
+import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
@@ -14,28 +21,26 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.templatemodel.TemplateModel;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
 import org.vaadin.harry.spring.data.Report;
 import org.vaadin.harry.spring.data.ReportDetail;
-import org.vaadin.harry.spring.data.ReportDetails;
 import org.vaadin.harry.spring.data.Reports;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A Designer generated component for the report-overview template.
- *
+ * <p>
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
 @Tag("report-overview")
 @JsModule("./src/views/report-overview/report-overview.js")
-@CssImport(value = "styles/views/report-overview/report-overview.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
-public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOverviewModel>  implements AfterNavigationObserver {
+@CssImport(value = "./styles/views/report-overview/report-overview.css")
+public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOverviewModel> implements AfterNavigationObserver {
 
-    public static  List<Report> data = null;
+    public static List<Report> data = null;
 
     @Id("vaadinComboBox")
     private ComboBox<String> vaadinComboBox;
@@ -64,20 +69,23 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     @Id("wrapper-table")
     private Element wrapperTable;
 
-    private  boolean isClicked_onlyMe = false;
-    private  boolean isClicked_Everyone = false;
+    private boolean isClicked_onlyMe = false;
+    private boolean isClicked_Everyone = false;
     private boolean isClicked_report = false;
     @Id("table")
     private Grid<Report> gridTable;
-    @Id("infos-report")
-    private Element detailDiv;
-    @Id("infos-report2")
-    private Element detailDivDiff;
+    //    @Id("infos-report")
+//    private Element detailDiv;
+//    @Id("infos-report2")
+//    private Element detailDivDiff;
+    @Id("wrapper-info")
+    private HorizontalLayout wrapperInfo;
+
     /**
      * Creates a new ReportOverview.
      */
     public ReportOverview() {
-        if (gridTable.getSelectedItems().isEmpty()){
+        if (gridTable.getSelectedItems().isEmpty()) {
             wrapperOverview.setVisible(false);
         }
 
@@ -108,35 +116,80 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 //        System.out.println(Table.getSelectedItems());
         gridTable.setSelectionMode(Grid.SelectionMode.MULTI);
         gridTable.asMultiSelect().addValueChangeListener(this::clickRow);
+
+        VerticalLayout footerReport = new VerticalLayout();
+        HorizontalLayout footerTitle = new HorizontalLayout();
+
+        footerTitle.addClassName("wrapper-subject-fields");
+        footerTitle.setWidth("100%");
+        footerTitle.setDefaultVerticalComponentAlignment(
+                FlexComponent.Alignment.CENTER);
+
+        Select<String> selectPriority = new Select<>();
+        selectPriority.setLabel("Priorrity");
+        selectPriority.setItems("a", "b", "c");
+
+        Select<String> selectType = new Select<>();
+        selectType.setLabel("Type");
+        selectType.setItems("a", "b", "c");
+
+        Select<String> status = new Select<>();
+        status.setLabel("Label");
+        status.setItems("a", "b", "c");
+
+        Select<String> selectVersion = new Select<>();
+        selectVersion.setLabel("Version");
+        selectVersion.setItems("a", "b", "c");
+
+        Button btnUpdate = new Button("Update");
+        Button btnRevert = new Button("Revert");
+        btnUpdate.addClassName("custom-margin-top");
+        btnRevert.addClassName("custom-margin-top");
+        footerTitle.add(selectPriority, selectType, status, selectVersion, btnUpdate, btnRevert);
+        //footerTitle.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        footerTitle.setFlexGrow(1, selectPriority);
+        footerTitle.setFlexGrow(1, selectType);
+        footerTitle.setFlexGrow(1, status);
+        footerTitle.setFlexGrow(1, selectVersion);
+        footerTitle.setFlexGrow(1, btnUpdate);
+        footerTitle.setFlexGrow(1, btnRevert);
+
+        footerReport.add(footerTitle);
+        HorizontalLayout footerContent = new HorizontalLayout();
+        Paragraph reportDetails = new Paragraph();
+        reportDetails.setText("demo......");
+        footerContent.add(reportDetails);
+        footerReport.add(footerContent);
+        wrapperInfo.add(footerReport);
+
+
     }
 
     private void clickRow(AbstractField.ComponentValueChangeEvent<Grid<Report>, Set<Report>> gridSetComponentValueChangeEvent) {
-            System.out.println(gridTable.getSelectedItems());
-            if (gridTable.getSelectedItems().isEmpty()){
-                wrapperOverview.setVisible(false);
-                return;
-            }
-            else {
-                wrapperOverview.setVisible(true);
-            }
+        System.out.println(gridTable.getSelectedItems());
+        if (gridTable.getSelectedItems().isEmpty()) {
+            wrapperOverview.setVisible(false);
+            return;
+        } else {
+            wrapperOverview.setVisible(true);
+        }
         System.out.println(gridSetComponentValueChangeEvent.getValue());
 
-        Set<Report> reportSet =  gridSetComponentValueChangeEvent.getValue();
+        Set<Report> reportSet = gridSetComponentValueChangeEvent.getValue();
 
         data = Arrays.asList(reportSet.toArray(new Report[0]));
         getModel().setPersons(data);
 
         if (data.size() == 1) {
-            detailDiv.setVisible(true);
-            detailDivDiff.setVisible(false);
-            Optional<ReportDetail> detail = ReportDetails.getReportDetail(data.get(0).getId());
-//            detail.ifPresent(reportDetail -> detailDiv.setText(reportDetail.getDetail()));
-            detail.ifPresent(rd -> getModel().setReportDetail(rd));
-        }
-        else {
+//            detailDiv.setVisible(true);
+//            detailDivDiff.setVisible(false);
+//            Optional<ReportDetail> detail = ReportDetails.getReportDetail(data.get(0).getId());
+////            detail.ifPresent(reportDetail -> detailDiv.setText(reportDetail.getDetail()));
+//            detail.ifPresent(rd -> getModel().setReportDetail(rd));
+        } else {
             // ask to handle whether in frontend or java server side
-            detailDiv.setVisible(false);
-            detailDivDiff.setVisible(true);
+//            detailDiv.setVisible(false);
+//            detailDivDiff.setVisible(true);
         }
 
         System.out.println(data);
@@ -167,6 +220,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         }
         System.out.println(buttonClickEvent.getButton());
     }
+
     private void showButtonClickedMessage_everyone(ClickEvent<Button> buttonClickEvent) {
         isClicked_onlyMe = false;
         isClicked_Everyone = true;
@@ -187,8 +241,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
      */
     public interface ReportOverviewModel extends TemplateModel {
         // Add setters and getters for template properties here.
-        public void setPersons(List<Report> data);
-        public void setReportDetail(ReportDetail detail);
+        void setPersons(List<Report> data);
+
+        void setReportDetail(ReportDetail detail);
     }
 
 }

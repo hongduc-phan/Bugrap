@@ -44,6 +44,11 @@
             <url>https://maven.vaadin.com/vaadin-addons</url>
             <snapshots><enabled>false</enabled></snapshots>
         </repository>
+        <repository>
+            <id>bugrap-repo</id>
+            <url>https://repo.vaadin.com/nexus/content/repositories/vaadin-bugrap</url>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
     </repositories>
 
     <dependencyManagement>
@@ -109,6 +114,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.vaadin</groupId>
+            <artifactId>bugrap-domain</artifactId>
+            <version>1.0</version>
         </dependency>
     </dependencies>
 

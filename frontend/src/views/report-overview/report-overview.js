@@ -102,14 +102,14 @@ background: none;">
    <div id="wrapper-table">
     <vaadin-grid id="table" height-by-rows column-reordering-allowed></vaadin-grid>
    </div>
-   <div id="wrapper-overview">
+   <div id="wrapper-overview" style="width: 80%;">
     <vaadin-horizontal-layout theme="spacing" id="wrapper-info">
-     <div id="infos-report" style="width: 80%;">
-        Detail id: [[reportDetail.id]]<br/>
-        Report id: [[reportDetail.reportId]]<br/>
-        [[reportDetail.detail]] 
-    </div>
-    <div id="infos-report2" style="width: 80%;"></div>
+     <!--     <div id="infos-report" style="width: 80%;">-->
+     <!--        Detail id: [[reportDetail.id]]<br/>-->
+     <!--        Report id: [[reportDetail.reportId]]<br/>-->
+     <!--        [[reportDetail.detail]] -->
+     <!--    </div>-->
+     <!--    <div id="infos-report2" style="width: 80%;"></div>-->
     </vaadin-horizontal-layout>
    </div>
   </vaadin-split-layout>
@@ -135,21 +135,21 @@ background: none;">
         //this.$.list.selectedItems = item ? [item] : [];
         // console.log(this.$)
         console.log(items);
-        if (items) {
-            this.$['infos-report2'].innerHTML = '';
-            items.map(i => {
-                this.$['infos-report2'].innerHTML += `<div style="display:flex; justify-content:space-between; padding-bottom: 16px; padding-top: 16pxd "> 
-    <div>  ${i.priority}</div>
-    <div>  ${i.assign}</div>
-    <div>  ${i.lastModified}</div>
-    <div>  ${i.summary}</div>
-    <div>  ${i.time}</div>
-    <div>  ${i.type}</div>
-</div>`
-
-            }
-        )
-        }
+//         if (items) {
+//             this.$['infos-report2'].innerHTML = '';
+//             items.map(i => {
+//                 this.$['infos-report2'].innerHTML += `<div style="display:flex; justify-content:space-between; padding-bottom: 16px; padding-top: 16pxd ">
+//     <div>  ${i.priority}</div>
+//     <div>  ${i.assign}</div>
+//     <div>  ${i.lastModified}</div>
+//     <div>  ${i.summary}</div>
+//     <div>  ${i.time}</div>
+//     <div>  ${i.type}</div>
+// </div>`
+//
+//             }
+//         )
+//         }
 
 
     }
