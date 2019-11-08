@@ -71,7 +71,8 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private Grid<Report> gridTable;
     @Id("infos-report")
     private Element detailDiv;
-
+    @Id("infos-report2")
+    private Element detailDivDiff;
     /**
      * Creates a new ReportOverview.
      */
@@ -126,13 +127,16 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         getModel().setPersons(data);
 
         if (data.size() == 1) {
+            detailDiv.setVisible(true);
+            detailDivDiff.setVisible(false);
             Optional<ReportDetail> detail = ReportDetails.getReportDetail(data.get(0).getId());
 //            detail.ifPresent(reportDetail -> detailDiv.setText(reportDetail.getDetail()));
             detail.ifPresent(rd -> getModel().setReportDetail(rd));
         }
         else {
             // ask to handle whether in frontend or java server side
-            wrapperOverview.setVisible(false);
+            detailDiv.setVisible(false);
+            detailDivDiff.setVisible(true);
         }
 
         System.out.println(data);

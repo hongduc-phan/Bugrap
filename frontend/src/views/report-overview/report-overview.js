@@ -109,6 +109,7 @@ background: none;">
         Report id: [[reportDetail.reportId]]<br/>
         [[reportDetail.detail]] 
     </div>
+    <div id="infos-report2" style="width: 80%;"></div>
     </vaadin-horizontal-layout>
    </div>
   </vaadin-split-layout>
@@ -119,6 +120,38 @@ background: none;">
 
     static get is() {
         return 'report-overview';
+    }
+
+    static get properties() {
+        return {
+            // Declare your properties here.
+            persons: {
+                observer: "_activeItemChanged",
+            }
+        };
+    }
+
+    _activeItemChanged(items) {
+        //this.$.list.selectedItems = item ? [item] : [];
+        // console.log(this.$)
+        console.log(items);
+        if (items) {
+            this.$['infos-report2'].innerHTML = '';
+            items.map(i => {
+                this.$['infos-report2'].innerHTML += `<div style="display:flex; justify-content:space-between; padding-bottom: 16px; padding-top: 16pxd "> 
+    <div>  ${i.priority}</div>
+    <div>  ${i.assign}</div>
+    <div>  ${i.lastModified}</div>
+    <div>  ${i.summary}</div>
+    <div>  ${i.time}</div>
+    <div>  ${i.type}</div>
+</div>`
+
+            }
+        )
+        }
+
+
     }
 
 
