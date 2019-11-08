@@ -15,7 +15,6 @@ public class ReportDetails {
         return reportDetails;
     }
 
-
     public static Optional<ReportDetail> getReportDetail(int reportId) {
         return getReportDetails().stream().filter(rd -> rd.getId() == reportId).findFirst();
     }
