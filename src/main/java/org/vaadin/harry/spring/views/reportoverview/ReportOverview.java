@@ -29,6 +29,7 @@ import org.vaadin.harry.spring.data.ReportDetail;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * A Designer generated component for the report-overview template.
@@ -96,54 +97,56 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         ArrayList<String> listProjects = new ArrayList<>();
         allProjects.stream().forEach(pr -> {
             listProjects.add(pr.getName());
-//            System.out.println(pr);
-//            System.out.println(listProjects);
         });
         //set items to project combo box
         projectsComboBox.setItems(listProjects);
         projectsComboBox.setValue(listProjects.get(0));
         AtomicReference<Project> refProject = new AtomicReference<>(new Project());
         AtomicReference refReport = new AtomicReference(new org.vaadin.bugrap.domain.entities.Report());
-        // due to project , we have project versions
+        AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new ProjectVersion());
+        AtomicReference<String> projectSelected = new AtomicReference(new ArrayList<>());
+
+        ArrayList<String> listVersions = new ArrayList<>();
+
+        if (!projectsComboBox.getValue().isEmpty()) {
+            projectSelected.set(projectsComboBox.getValue());
+            Optional<Project> project = allProjects.stream().filter(p -> {
+                return p.getName().toLowerCase().equals(projectsComboBox.getValue().toLowerCase());
+            }).findFirst();
+//                    System.out.println(project);
+            project.ifPresent(pro -> {
+                projectVersions.set(bugrapRepository.findProjectVersions(pro));
+
+                projectVersions.get().stream().forEach(version -> {
+                    listVersions.add(version.getVersion());
+                });
+                vaadinSelect.setValue((listVersions.get(0)));
+                vaadinSelect.setItems(listVersions);
+            });
+        }
+
+        // event Click of combo box component to select project
         projectsComboBox.addValueChangeListener(
                 e -> {
-                    Optional<Project> project = allProjects.stream().filter(p -> p.getName().equals(e.getValue())).findFirst();
+                    projectSelected.set(e.getValue());
+                    Optional<Project> project = allProjects.stream().filter(p -> {
+                        return p.getName().equals(e.getValue());
+                    }).findFirst();
                     project.ifPresent(pro -> {
-                        Set<ProjectVersion> projectVersions = bugrapRepository.findProjectVersions(pro);
-                        refProject.set(pro);
-                        ArrayList<String> listVersions = new ArrayList<>();
-                        projectVersions.stream().forEach(version -> {
+                        projectVersions.set(bugrapRepository.findProjectVersions(pro));
+
+                        projectVersions.get().stream().forEach(version -> {
                             listVersions.add(version.getVersion());
                         });
+                        //vaadinSelect.setItems();
                         vaadinSelect.setItems(listVersions);
                         vaadinSelect.setValue((listVersions.get(0)));
 
-                        vaadinSelect.addValueChangeListener(version -> {
-                            Optional<ProjectVersion> first = projectVersions.stream().filter(v -> v.getVersion().equals(version.getValue())).findFirst();
-                            Set<org.vaadin.bugrap.domain.entities.Report> reports
-                                    = this.listReports(pro, first.get(), bugrapRepository);
-                            refReport.set(first);
-                            System.out.println(reports);
-//                            BugrapRepository.ReportsQuery query = new BugrapRepository.ReportsQuery();
-//                            query.project = pro;
-                           // query.projectVersion = first.get();
-//                            Set<org.vaadin.bugrap.domain.entities.Report> reportsList = bugrapRepository.findReports(query);
-                           // System.out.println(reports.stream().findFirst().get().getType());
-
-                            // add titles to grid table
-//                            gridTable.addColumn(Report::getPriority).setHeader("PRIORITY");
-//                            gridTable.addColumn(Report::getType).setFlexGrow(0).setWidth("100px").setHeader("TYPE");
-//                                    gridTable.addColumn(Report::getSummary).setHeader("SUMMARY");
-//                                    gridTable.addColumn(Report::getAssign).setFlexGrow(0).setWidth("100px").setHeader("ASSIGNED TO");
-//                                    gridTable.addColumn(Report::getLastModified).setHeader("LAST MODIFIED").setWidth("140px");
-//                                    gridTable.addColumn(Report::getTime).setHeader("REPORTED").setWidth("140px");
-                        });
 //                        List<org.vaadin.bugrap.domain.entities.Report> listReports =
 //                                (List<org.vaadin.bugrap.domain.entities.Report>) vaadinSelect.addValueChangeListener(ver -> {
 //                            List<org.vaadin.bugrap.domain.entities.Report> reports =
 //                                    this.listReports(pro, (ProjectVersion) ver, bugrapRepository);
 //
-//                            System.out.println(reports);
 //                                    // in order to hide the report overview detail in footer
 //                                    if (gridTable.getSelectedItems().isEmpty()) {
 //                                        wrapperOverview.setVisible(false);
@@ -158,11 +161,70 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 //
 //                                    gridTable.setItems(Reports.getReports());
 //                        });
-//                        System.out.println(listReports);
                     });
 
 
                 });
+
+
+//
+//        // event Click of Select component to select project version
+        vaadinSelect.addValueChangeListener(version -> {
+
+            String projectVersionSelected = (String) version.getValue();
+            // projectVersions.get().stream().filter(v -> v.getVersion().equals(version.getValue())).findFirst();
+            Set<org.vaadin.bugrap.domain.entities.Report> reports
+                    = this.listReports(null, null, bugrapRepository);
+
+            System.out.println(reports);
+            // filter report by project and project version
+            // project
+            List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject = reports.stream()
+                    .filter(rl -> rl.getProject() != null)
+                    .filter(r -> projectSelected.get().equalsIgnoreCase(r.getProject().getName()))
+                    .collect(Collectors.toList());
+
+
+            List<org.vaadin.bugrap.domain.entities.Report> reportListFilterNotNullCheck = reportListFilterByProject
+                    .stream()
+                    .filter(rl -> !rl.getVersion().getVersion().isEmpty()).collect(Collectors.toList());
+            System.out.println(reportListFilterNotNullCheck);
+//            // version
+//            if (!reportListFilterByProject.isEmpty()) {
+//                List<org.vaadin.bugrap.domain.entities.Report> reportListFilterNotNull = reportListFilterByProject
+//                        .stream()
+//                        .filter(rl -> !rl.getVersion().getVersion().isEmpty())
+//                        .filter(reportFilterbyVersion -> {
+//                            return reportFilterbyVersion.getVersion().toString().toLowerCase().equals(projectVersionSelected.toLowerCase());
+//                        })
+//                        .collect(Collectors.toList());
+//                System.out.println(reportListFilterNotNull);
+//            }
+
+
+//                            List<org.vaadin.bugrap.domain.entities.Report> reportListFilter = reports.stream()
+//                                    .filter(r -> projectSelected.equalsIgnoreCase(r.getProject().toString()))
+//                                    .filter(reportFilter -> reportFilter.getProject() != null && reportFilter.getVersion().toString().toLowerCase().equals(projectVersionSelected.toLowerCase()))
+//                                    .collect(Collectors.toList());
+
+            // filter report by project version
+//                            List<org.vaadin.bugrap.domain.entities.Report> reportFilterByProjectAndVersion = reportListFilterNotNull.stream()
+//                            .filter(reportFilterbyVersion -> reportFilterbyVersion.getVersion().getVersion().toString().toLowerCase().equals(projectVersionSelected.toLowerCase()))
+//                            .collect(Collectors.toList());
+
+//                            BugrapRepository.ReportsQuery query = new BugrapRepository.ReportsQuery();
+//                            query.project = pro;
+            // query.projectVersion = first.get();
+//                            Set<org.vaadin.bugrap.domain.entities.Report> reportsList = bugrapRepository.findReports(query);
+
+            // add titles to grid table
+//                            gridTable.addColumn(Report::getPriority).setHeader("PRIORITY");
+//                            gridTable.addColumn(Report::getType).setFlexGrow(0).setWidth("100px").setHeader("TYPE");
+//                                    gridTable.addColumn(Report::getSummary).setHeader("SUMMARY");
+//                                    gridTable.addColumn(Report::getAssign).setFlexGrow(0).setWidth("100px").setHeader("ASSIGNED TO");
+//                                    gridTable.addColumn(Report::getLastModified).setHeader("LAST MODIFIED").setWidth("140px");
+//                                    gridTable.addColumn(Report::getTime).setHeader("REPORTED").setWidth("140px");
+        });
 //        // in order to hide the report overview detail in footer
 //        if (gridTable.getSelectedItems().isEmpty()) {
 //            wrapperOverview.setVisible(false);
@@ -170,21 +232,18 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         // projectsComboBox.setValue("Google Chrome");
 
-        vaadinTextField.addValueChangeListener((e -> System.out.println(e.getValue())));
-//        vaadinSelect.addValueChangeListener(
-//                e -> {
-//                    Set<ProjectVersion> projectVersions = bugrapRepository.findProjectVersions((Project) e.getValue());
-//                    System.out.println(projectVersions);
-//                });
+//        vaadinTextField.addValueChangeListener((e -> System.out.println(e.getValue())));
+////        vaadinSelect.addValueChangeListener(
+////                e -> {
+////                    Set<ProjectVersion> projectVersions = bugrapRepository.findProjectVersions((Project) e.getValue());
+////                });
         vaadinProgressBar.setValue(0.15);
 
         btnOnlyMe.addClickListener(this::showButtonClickedMessage_onlyMe);
         btnEveryOne.addClickListener(this::showButtonClickedMessage_everyone);
 
 
-        //System.out.println( reportList);
 //        Table.getSelectedItems();
-//        System.out.println(Table.getSelectedItems());
         gridTable.setSelectionMode(Grid.SelectionMode.MULTI);
         gridTable.asMultiSelect().addValueChangeListener(this::clickRow);
 
@@ -240,22 +299,17 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         BugrapRepository.ReportsQuery query = new BugrapRepository.ReportsQuery();
         query.project = project;
         query.projectVersion = projectVersion;
-        System.out.println(query);
-        System.out.println(project);
-        System.out.println(projectVersion);
         Set<org.vaadin.bugrap.domain.entities.Report> reports = bugrapRepository.findReports(query);
         return reports;
     }
 
     private void clickRow(AbstractField.ComponentValueChangeEvent<Grid<Report>, Set<Report>> gridSetComponentValueChangeEvent) {
-        System.out.println(gridTable.getSelectedItems());
         if (gridTable.getSelectedItems().isEmpty()) {
             wrapperOverview.setVisible(false);
             return;
         } else {
             wrapperOverview.setVisible(true);
         }
-        System.out.println(gridSetComponentValueChangeEvent.getValue());
 
         Set<Report> reportSet = gridSetComponentValueChangeEvent.getValue();
 
@@ -274,19 +328,15 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 //            detailDivDiff.setVisible(true);
         }
 
-        System.out.println(data);
 //        while (data.hasNext()) {
 //            final Report next = data.next();
-//            System.out.println(next.getSummary());
 //        }
 
         reportSet.forEach(report -> {
-            //System.out.println(report.getSummary());
 
         });
 
 //        for (Report report : reportSet) {
-//            System.out.println(report.getSummary());
 //        }
 
 
@@ -300,7 +350,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             btnEveryOne.setClassName("primary");
             btnOnlyMe.setClassName("clicked-active");
         }
-        System.out.println(buttonClickEvent.getButton());
     }
 
     private void showButtonClickedMessage_everyone(ClickEvent<Button> buttonClickEvent) {
@@ -310,7 +359,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             btnOnlyMe.setClassName("primary");
             btnEveryOne.setClassName("clicked-active");
         }
-        System.out.println(buttonClickEvent.getButton());
     }
 
     @Override
