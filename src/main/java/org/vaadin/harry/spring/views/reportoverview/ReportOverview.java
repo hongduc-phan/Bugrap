@@ -96,6 +96,13 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private static HorizontalLayout footerContent = new HorizontalLayout();
     private static Text author = new Text("");
     private static Paragraph reportDetails = new Paragraph();
+    private static Button btnUpdate = new Button("Update");
+    private static Button btnRevert = new Button("Revert");
+
+    private static AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new ProjectVersion());
+    private static AtomicReference<String> projectSelected = new AtomicReference(new ArrayList<>());
+    private static ArrayList<String> listVersions = new ArrayList<>();
+    private static List<Report> reportListFilterByProjectAndVersion = new ArrayList<Report>();
     /**
      * Creates a new ReportOverview.
      */
@@ -114,10 +121,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         projectsComboBox.setItems(listProjects);
         projectsComboBox.setValue(listProjects.get(0));
 
-        AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new ProjectVersion());
-        AtomicReference<String> projectSelected = new AtomicReference(new ArrayList<>());
 
-        ArrayList<String> listVersions = new ArrayList<>();
 
         // Titles of report table with grid
         reportTable.addColumn(Report::getPriority).setHeader("PRIORITY");
@@ -150,9 +154,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         // UIs
         vaadinProgressBar.setValue(0.15);
 
-        btnOnlyMe.addClickListener(this::showButtonClickedMessage_onlyMe);
-        btnEveryOne.addClickListener(this::showButtonClickedMessage_everyone);
-
+        // filter report by clicking Only Me
+        this.filterReportByBtnOnlyMe();
+        this.filterReportByBtnEveryOne();
 
         footerTitle.addClassName("wrapper-subject-fields");
         footerTitle.setWidth("100%");
@@ -165,8 +169,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         status.setLabel("Label");
         versionSelected.setLabel("Version");
 
-        Button btnUpdate = new Button("Update");
-        Button btnRevert = new Button("Revert");
         btnUpdate.addClassName("custom-margin-top");
         btnRevert.addClassName("custom-margin-top");
         footerTitle.add(selectPriority, selectType, status, versionSelected, btnUpdate, btnRevert);
@@ -183,6 +185,16 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         footerContent.add(reportDetails);
         footerReport.add(footerContent);
         wrapperInfo.add(footerReport);
+
+
+    }
+
+    private void filterReportByBtnEveryOne() {
+        btnEveryOne.addClickListener(this::showButtonClickedMessage_everyone);
+    }
+
+    private void filterReportByBtnOnlyMe() {
+        btnOnlyMe.addClickListener(this::showButtonClickedMessage_onlyMe);
 
 
     }
@@ -255,13 +267,13 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
 //            // version
             if (!reportListFilterByProject.isEmpty()) {
-                List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProjectAndVersion = reportListFilterByProject
+                reportListFilterByProjectAndVersion = reportListFilterByProject
                         .stream()
                         .filter(rl -> rl.getVersion() != null
                                 && !StringUtils.isEmpty(rl.getVersion().getVersion())
                                 && rl.getVersion().getVersion().toLowerCase().equals(projectVersionSelected.toLowerCase()))
                         .collect(Collectors.toList());
-                System.out.println(reportListFilterByProjectAndVersion.size());
+
                 reportTable.setItems(reportListFilterByProjectAndVersion);
                 this.setVisibleOverviewReport();
             }
@@ -316,10 +328,17 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         }
     }
 
-
     private void showButtonClickedMessage_onlyMe(ClickEvent<Button> buttonClickEvent) {
         isClicked_onlyMe = true;
         isClicked_Everyone = false;
+        if (reportListFilterByProjectAndVersion.size() > 0) {
+            List<Report> reportOnlyMe = reportListFilterByProjectAndVersion
+                    .stream()
+                    .filter(report -> report != null && report.getAssigned() != null && report.getAssigned().getName().toString().toLowerCase().equals("developer"))
+                    .collect(Collectors.toList());
+            reportTable.setItems(reportOnlyMe);
+            this.setVisibleOverviewReport();
+        }
         if (isClicked_onlyMe) {
             btnEveryOne.setClassName("primary");
             btnOnlyMe.setClassName("clicked-active");
@@ -329,6 +348,12 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private void showButtonClickedMessage_everyone(ClickEvent<Button> buttonClickEvent) {
         isClicked_onlyMe = false;
         isClicked_Everyone = true;
+
+        if (reportListFilterByProjectAndVersion.size() > 0) {
+            reportTable.setItems(reportListFilterByProjectAndVersion);
+            this.setVisibleOverviewReport();
+        }
+
         if (isClicked_Everyone) {
             btnOnlyMe.setClassName("primary");
             btnEveryOne.setClassName("clicked-active");
