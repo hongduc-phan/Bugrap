@@ -28,7 +28,6 @@ import org.vaadin.bugrap.domain.entities.ProjectVersion;
 
 
 import org.vaadin.bugrap.domain.entities.Report;
-import org.vaadin.harry.spring.data.ReportDetail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,20 +81,26 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private boolean isClicked_Everyone = false;
     private boolean isClicked_report = false;
     @Id("table")
-    private static Grid<Report> gridTable;
+    private static Grid<Report> reportTable;
     //    @Id("infos-report")
 //    private Element detailDiv;
 //    @Id("infos-report2")
 //    private Element detailDivDiff;
     @Id("wrapper-info")
     private HorizontalLayout wrapperInfo;
-
+    private static VerticalLayout footerReport = new VerticalLayout();
+    private static HorizontalLayout footerTitle = new HorizontalLayout();
+    private static Select<String> selectPriority = new Select<>();
+    private static  Select<String> status = new Select<>();
+    private static Select<String> versionSelected = new Select<>();
+    private static Select<String> selectType = new Select<>();
     /**
      * Creates a new ReportOverview.
      */
     public ReportOverview() {
         bugrapRepository.populateWithTestData();
 
+        this.setVisibleOverviewReport();
         // find all projects
         Set<Project> allProjects = this.findAllProjects();
 
@@ -113,17 +118,23 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         ArrayList<String> listVersions = new ArrayList<>();
 
         // Titles of report table with grid
-        gridTable.addColumn(Report::getPriority).setHeader("PRIORITY");
-        gridTable.addColumn(Report::getType).setFlexGrow(0).setWidth("100px").setHeader("TYPE");
-        gridTable.addColumn(Report::getSummary).setHeader("SUMMARY");
-        gridTable.addColumn(Report::getAssigned).setFlexGrow(0).setWidth("100px").setHeader("ASSIGNED TO");
-        gridTable.addColumn(Report::getReportedTimestamp).setHeader("LAST MODIFIED").setWidth("140px");
-        gridTable.addColumn(Report::getTimestamp).setHeader("REPORTED").setWidth("140px");
+        reportTable.addColumn(Report::getPriority).setHeader("PRIORITY");
+        reportTable.addColumn(Report::getType).setFlexGrow(0).setWidth("100px").setHeader("TYPE");
+        reportTable.addColumn(Report::getSummary).setHeader("SUMMARY");
+        reportTable.addColumn(Report::getAssigned).setFlexGrow(0).setWidth("160px").setHeader("ASSIGNED TO");
+        reportTable.addColumn(Report::getReportedTimestamp).setHeader("LAST MODIFIED").setWidth("140px");
+        reportTable.addColumn(Report::getTimestamp).setHeader("REPORTED").setWidth("140px");
 
         this.setValueForProjectAndVersionWithoutClickEvents(projectVersions,
                 projectSelected,
                 allProjects,
                 listVersions);
+
+        // set grid report table can select muiti rows
+        reportTable.getSelectedItems();
+        reportTable.setSelectionMode(Grid.SelectionMode.MULTI);
+        // listen event listener when triggering clicking
+        reportTable.asMultiSelect().addValueChangeListener(this::clickRow);
 
         // event Click of combo box component to select project
         this.filterReportByProject(projectVersions,
@@ -200,39 +211,34 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         btnEveryOne.addClickListener(this::showButtonClickedMessage_everyone);
 
 
-//        Table.getSelectedItems();
-//        gridTable.setSelectionMode(Grid.SelectionMode.MULTI);
-//        gridTable.asMultiSelect().addValueChangeListener(this::clickRow);
 
-        VerticalLayout footerReport = new VerticalLayout();
-        HorizontalLayout footerTitle = new HorizontalLayout();
+
+
 
         footerTitle.addClassName("wrapper-subject-fields");
         footerTitle.setWidth("100%");
         footerTitle.setDefaultVerticalComponentAlignment(
                 FlexComponent.Alignment.CENTER);
 
-        Select<String> selectPriority = new Select<>();
-        selectPriority.setLabel("Priorrity");
-        selectPriority.setItems("a", "b", "c");
 
-        Select<String> selectType = new Select<>();
+        selectPriority.setLabel("Priorrity");
+
         selectType.setLabel("Type");
         selectType.setItems("a", "b", "c");
 
-        Select<String> status = new Select<>();
+
         status.setLabel("Label");
         status.setItems("a", "b", "c");
 
-        Select<String> selectVersion = new Select<>();
-        selectVersion.setLabel("Version");
-        selectVersion.setItems("a", "b", "c");
+
+        versionSelected.setLabel("Version");
+        versionSelected.setItems("a", "b", "c");
 
         Button btnUpdate = new Button("Update");
         Button btnRevert = new Button("Revert");
         btnUpdate.addClassName("custom-margin-top");
         btnRevert.addClassName("custom-margin-top");
-        footerTitle.add(selectPriority, selectType, status, selectVersion, btnUpdate, btnRevert);
+        footerTitle.add(selectPriority, selectType, status, versionSelected, btnUpdate, btnRevert);
         //footerTitle.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         footerTitle.setFlexGrow(1, selectPriority);
         footerTitle.setFlexGrow(1, selectType);
@@ -260,22 +266,23 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                                                                 AtomicReference<String> projectSelected,
                                                                 Set<Project> allProjects,
                                                                 ArrayList<String> listVersions) {
-        if (!projectsComboBox.getValue().isEmpty()) {
             projectSelected.set(projectsComboBox.getValue());
             Optional<Project> project = allProjects.stream().filter(p -> {
                 return p.getName().toLowerCase().equals(projectsComboBox.getValue().toLowerCase());
             }).findFirst();
-
+            System.out.println(project);
             project.ifPresent(pro -> {
                 projectVersions.set(bugrapRepository.findProjectVersions(pro));
 
                 projectVersions.get().forEach(version -> {
                     listVersions.add(version.getVersion());
                 });
-                selectVersion.setValue((listVersions.get(0)));
+
                 selectVersion.setItems(listVersions);
+                selectVersion.setValue(listVersions.get(0));
+                System.out.println(listVersions.get(0));
             });
-        }
+            this.setVisibleOverviewReport();
     }
 
     private void filterReportByProject(AtomicReference<Set<ProjectVersion>> projectVersions,
@@ -296,6 +303,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                         });
                         //vaadinSelect.setItems();
                         selectVersion.setValue((listVersions.get(0)));
+                        this.setVisibleOverviewReport();
                     });
                 });
     }
@@ -325,9 +333,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                                 && rl.getVersion().getVersion().toLowerCase().equals(projectVersionSelected.toLowerCase()))
                         .collect(Collectors.toList());
                 System.out.println(reportListFilterByProjectAndVersion.size());
-                gridTable.setItems(reportListFilterByProjectAndVersion);
+                reportTable.setItems(reportListFilterByProjectAndVersion);
+                this.setVisibleOverviewReport();
             }
-
         });
     }
 
@@ -339,44 +347,26 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         return reports;
     }
 
-//    private void clickRow(AbstractField.ComponentValueChangeEvent<Grid<Report>, Set<Report>> gridSetComponentValueChangeEvent) {
-//        if (gridTable.getSelectedItems().isEmpty()) {
-//            wrapperOverview.setVisible(false);
-//            return;
-//        } else {
-//            wrapperOverview.setVisible(true);
-//        }
-//
-//        Set<Report> reportSet = gridSetComponentValueChangeEvent.getValue();
-//
-////        data = Arrays.asList(reportSet.toArray(new Report[0]));
-////        getModel().setPersons(data);
-////
-////        if (data.size() == 1) {
-//////            detailDiv.setVisible(true);
-//////            detailDivDiff.setVisible(false);
-//////            Optional<ReportDetail> detail = ReportDetails.getReportDetail(data.get(0).getId());
-////////            detail.ifPresent(reportDetail -> detailDiv.setText(reportDetail.getDetail()));
-//////            detail.ifPresent(rd -> getModel().setReportDetail(rd));
-////        } else {
-////            // ask to handle whether in frontend or java server side
-//////            detailDiv.setVisible(false);
-//////            detailDivDiff.setVisible(true);
-////        }
-//
-////        while (data.hasNext()) {
-////            final Report next = data.next();
-////        }
-//
-//        reportSet.forEach(report -> {
-//
-//        });
-//
-////        for (Report report : reportSet) {
-////        }
-//
-//
-//    }
+    private  void setVisibleOverviewReport () {
+        if (reportTable.getSelectedItems().isEmpty()) {
+            wrapperOverview.setVisible(false);
+        } else {
+            wrapperOverview.setVisible(true);
+        }
+    }
+    private void clickRow(AbstractField.ComponentValueChangeEvent<Grid<Report>, Set<Report>> gridSetComponentValueChangeEvent) {
+       this.setVisibleOverviewReport();
+
+        Set<Report> reportSet = gridSetComponentValueChangeEvent.getValue();
+
+        if (reportSet.size() == 1) {
+            reportSet.forEach( r -> {
+                selectPriority.setValue("prei");
+            });
+        }
+
+
+    }
 
 
     private void showButtonClickedMessage_onlyMe(ClickEvent<Button> buttonClickEvent) {
