@@ -25,7 +25,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.vaadin.bugrap.domain.BugrapRepository;
 import org.vaadin.bugrap.domain.entities.Project;
 import org.vaadin.bugrap.domain.entities.ProjectVersion;
-import org.vaadin.harry.spring.data.Report;
+
+
+import org.vaadin.bugrap.domain.entities.Report;
 import org.vaadin.harry.spring.data.ReportDetail;
 
 import java.util.ArrayList;
@@ -80,7 +82,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private boolean isClicked_Everyone = false;
     private boolean isClicked_report = false;
     @Id("table")
-    private Grid<Report> gridTable;
+    private static Grid<Report> gridTable;
     //    @Id("infos-report")
 //    private Element detailDiv;
 //    @Id("infos-report2")
@@ -110,19 +112,29 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         ArrayList<String> listVersions = new ArrayList<>();
 
+        // Titles of report table with grid
+        gridTable.addColumn(Report::getPriority).setHeader("PRIORITY");
+        gridTable.addColumn(Report::getType).setFlexGrow(0).setWidth("100px").setHeader("TYPE");
+        gridTable.addColumn(Report::getSummary).setHeader("SUMMARY");
+        gridTable.addColumn(Report::getAssigned).setFlexGrow(0).setWidth("100px").setHeader("ASSIGNED TO");
+        gridTable.addColumn(Report::getReportedTimestamp).setHeader("LAST MODIFIED").setWidth("140px");
+        gridTable.addColumn(Report::getTimestamp).setHeader("REPORTED").setWidth("140px");
+
         this.setValueForProjectAndVersionWithoutClickEvents(projectVersions,
                 projectSelected,
                 allProjects,
                 listVersions);
 
         // event Click of combo box component to select project
-        this.eventChangeValueWhenSelectProject(projectVersions,
+        this.filterReportByProject(projectVersions,
                 projectSelected,
                 allProjects,
                 listVersions);
 
         // event Click of Select component to select project version
-        this.eventChangeValueWhenSelectVersion(projectSelected);
+        this.filterReportByVersion(projectSelected);
+
+
 
 //                        List<org.vaadin.bugrap.domain.entities.Report> listReports =
 //                                (List<org.vaadin.bugrap.domain.entities.Report>) vaadinSelect.addValueChangeListener(ver -> {
@@ -189,8 +201,8 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
 
 //        Table.getSelectedItems();
-        gridTable.setSelectionMode(Grid.SelectionMode.MULTI);
-        gridTable.asMultiSelect().addValueChangeListener(this::clickRow);
+//        gridTable.setSelectionMode(Grid.SelectionMode.MULTI);
+//        gridTable.asMultiSelect().addValueChangeListener(this::clickRow);
 
         VerticalLayout footerReport = new VerticalLayout();
         HorizontalLayout footerTitle = new HorizontalLayout();
@@ -266,10 +278,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         }
     }
 
-    private void eventChangeValueWhenSelectProject(AtomicReference<Set<ProjectVersion>> projectVersions,
-                                                   AtomicReference<String> projectSelected,
-                                                   Set<Project> allProjects,
-                                                   ArrayList<String> listVersions) {
+    private void filterReportByProject(AtomicReference<Set<ProjectVersion>> projectVersions,
+                                       AtomicReference<String> projectSelected,
+                                       Set<Project> allProjects,
+                                       ArrayList<String> listVersions) {
         projectsComboBox.addValueChangeListener(
                 e -> {
                     projectSelected.set(e.getValue());
@@ -288,9 +300,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                 });
     }
 
-    private void eventChangeValueWhenSelectVersion(
-            AtomicReference<String> projectSelected
-    ) {
+    private void filterReportByVersion(AtomicReference<String> projectSelected) {
         selectVersion.addValueChangeListener(version -> {
 
             String projectVersionSelected = (String) version.getValue();
@@ -315,6 +325,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                                 && rl.getVersion().getVersion().toLowerCase().equals(projectVersionSelected.toLowerCase()))
                         .collect(Collectors.toList());
                 System.out.println(reportListFilterByProjectAndVersion.size());
+                gridTable.setItems(reportListFilterByProjectAndVersion);
             }
 
         });
@@ -328,44 +339,44 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         return reports;
     }
 
-    private void clickRow(AbstractField.ComponentValueChangeEvent<Grid<Report>, Set<Report>> gridSetComponentValueChangeEvent) {
-        if (gridTable.getSelectedItems().isEmpty()) {
-            wrapperOverview.setVisible(false);
-            return;
-        } else {
-            wrapperOverview.setVisible(true);
-        }
-
-        Set<Report> reportSet = gridSetComponentValueChangeEvent.getValue();
-
-//        data = Arrays.asList(reportSet.toArray(new Report[0]));
-//        getModel().setPersons(data);
-//
-//        if (data.size() == 1) {
-////            detailDiv.setVisible(true);
-////            detailDivDiff.setVisible(false);
-////            Optional<ReportDetail> detail = ReportDetails.getReportDetail(data.get(0).getId());
-//////            detail.ifPresent(reportDetail -> detailDiv.setText(reportDetail.getDetail()));
-////            detail.ifPresent(rd -> getModel().setReportDetail(rd));
+//    private void clickRow(AbstractField.ComponentValueChangeEvent<Grid<Report>, Set<Report>> gridSetComponentValueChangeEvent) {
+//        if (gridTable.getSelectedItems().isEmpty()) {
+//            wrapperOverview.setVisible(false);
+//            return;
 //        } else {
-//            // ask to handle whether in frontend or java server side
-////            detailDiv.setVisible(false);
-////            detailDivDiff.setVisible(true);
+//            wrapperOverview.setVisible(true);
 //        }
-
-//        while (data.hasNext()) {
-//            final Report next = data.next();
-//        }
-
-        reportSet.forEach(report -> {
-
-        });
-
-//        for (Report report : reportSet) {
-//        }
-
-
-    }
+//
+//        Set<Report> reportSet = gridSetComponentValueChangeEvent.getValue();
+//
+////        data = Arrays.asList(reportSet.toArray(new Report[0]));
+////        getModel().setPersons(data);
+////
+////        if (data.size() == 1) {
+//////            detailDiv.setVisible(true);
+//////            detailDivDiff.setVisible(false);
+//////            Optional<ReportDetail> detail = ReportDetails.getReportDetail(data.get(0).getId());
+////////            detail.ifPresent(reportDetail -> detailDiv.setText(reportDetail.getDetail()));
+//////            detail.ifPresent(rd -> getModel().setReportDetail(rd));
+////        } else {
+////            // ask to handle whether in frontend or java server side
+//////            detailDiv.setVisible(false);
+//////            detailDivDiff.setVisible(true);
+////        }
+//
+////        while (data.hasNext()) {
+////            final Report next = data.next();
+////        }
+//
+//        reportSet.forEach(report -> {
+//
+//        });
+//
+////        for (Report report : reportSet) {
+////        }
+//
+//
+//    }
 
 
     private void showButtonClickedMessage_onlyMe(ClickEvent<Button> buttonClickEvent) {
@@ -396,9 +407,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
      */
     public interface ReportOverviewModel extends TemplateModel {
         // Add setters and getters for template properties here.
-        void setPersons(List<Report> data);
-
-        void setReportDetail(ReportDetail detail);
+//        void setPersons(List<org.vaadin.bugrap.domain.entities.Report> data);
+//
+//        void setReportDetail(ReportDetail detail);
     }
 
 }
