@@ -21,6 +21,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.templatemodel.TemplateModel;
+import org.apache.commons.lang3.StringUtils;
 import org.vaadin.bugrap.domain.BugrapRepository;
 import org.vaadin.bugrap.domain.entities.Project;
 import org.vaadin.bugrap.domain.entities.ProjectVersion;
@@ -42,7 +43,8 @@ import java.util.stream.Collectors;
 @CssImport(value = "./styles/views/report-overview/report-overview.css")
 public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOverviewModel> implements AfterNavigationObserver {
 
-    public static List<Report> data = null;
+    // connect to Bugrap domain service
+    private static BugrapRepository  bugrapRepository = new BugrapRepository("/tmp/bugrap;create=true");
 
     @Id("vaadinComboBox")
     private ComboBox<String> projectsComboBox;
@@ -53,7 +55,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     @Id("search")
     private TextField vaadinTextField;
     @Id("select-project")
-    private Select vaadinSelect;
+    private Select selectVersion;
     @Id("overview-project")
     private ProgressBar vaadinProgressBar;
     @Id("btn-onlyme")
@@ -87,13 +89,11 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
      * Creates a new ReportOverview.
      */
     public ReportOverview() {
-
-        // connect to Bugrap domain service
-        BugrapRepository bugrapRepository = new BugrapRepository("/tmp/bugrap;create=true");
         bugrapRepository.populateWithTestData();
 
         // find all projects
-        Set<Project> allProjects = bugrapRepository.findProjects();
+        Set<Project> allProjects = this.findAllProjects();
+
         ArrayList<String> listProjects = new ArrayList<>();
         allProjects.stream().forEach(pr -> {
             listProjects.add(pr.getName());
@@ -101,6 +101,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         //set items to project combo box
         projectsComboBox.setItems(listProjects);
         projectsComboBox.setValue(listProjects.get(0));
+
         AtomicReference<Project> refProject = new AtomicReference<>(new Project());
         AtomicReference refReport = new AtomicReference(new org.vaadin.bugrap.domain.entities.Report());
         AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new ProjectVersion());
@@ -113,15 +114,15 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             Optional<Project> project = allProjects.stream().filter(p -> {
                 return p.getName().toLowerCase().equals(projectsComboBox.getValue().toLowerCase());
             }).findFirst();
-//                    System.out.println(project);
+
             project.ifPresent(pro -> {
                 projectVersions.set(bugrapRepository.findProjectVersions(pro));
 
                 projectVersions.get().stream().forEach(version -> {
                     listVersions.add(version.getVersion());
                 });
-                vaadinSelect.setValue((listVersions.get(0)));
-                vaadinSelect.setItems(listVersions);
+                selectVersion.setValue((listVersions.get(0)));
+                selectVersion.setItems(listVersions);
             });
         }
 
@@ -139,8 +140,8 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                             listVersions.add(version.getVersion());
                         });
                         //vaadinSelect.setItems();
-                        vaadinSelect.setItems(listVersions);
-                        vaadinSelect.setValue((listVersions.get(0)));
+                        selectVersion.setItems(listVersions);
+                        selectVersion.setValue((listVersions.get(0)));
 
 //                        List<org.vaadin.bugrap.domain.entities.Report> listReports =
 //                                (List<org.vaadin.bugrap.domain.entities.Report>) vaadinSelect.addValueChangeListener(ver -> {
@@ -169,7 +170,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
 //
 //        // event Click of Select component to select project version
-        vaadinSelect.addValueChangeListener(version -> {
+        selectVersion.addValueChangeListener(version -> {
 
             String projectVersionSelected = (String) version.getValue();
             // projectVersions.get().stream().filter(v -> v.getVersion().equals(version.getValue())).findFirst();
@@ -184,22 +185,16 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                     .filter(r -> projectSelected.get().equalsIgnoreCase(r.getProject().getName()))
                     .collect(Collectors.toList());
 
-
-            List<org.vaadin.bugrap.domain.entities.Report> reportListFilterNotNullCheck = reportListFilterByProject
-                    .stream()
-                    .filter(rl -> !rl.getVersion().getVersion().isEmpty()).collect(Collectors.toList());
-            System.out.println(reportListFilterNotNullCheck);
 //            // version
-//            if (!reportListFilterByProject.isEmpty()) {
-//                List<org.vaadin.bugrap.domain.entities.Report> reportListFilterNotNull = reportListFilterByProject
-//                        .stream()
-//                        .filter(rl -> !rl.getVersion().getVersion().isEmpty())
-//                        .filter(reportFilterbyVersion -> {
-//                            return reportFilterbyVersion.getVersion().toString().toLowerCase().equals(projectVersionSelected.toLowerCase());
-//                        })
-//                        .collect(Collectors.toList());
-//                System.out.println(reportListFilterNotNull);
-//            }
+            if (!reportListFilterByProject.isEmpty()) {
+                List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProjectAndVersion = reportListFilterByProject
+                        .stream()
+                        .filter(rl -> rl.getVersion() != null
+                                && !StringUtils.isEmpty(rl.getVersion().getVersion())
+                                && rl.getVersion().getVersion().toString().toLowerCase().equals(projectVersionSelected.toLowerCase()))
+                        .collect(Collectors.toList());
+                System.out.println(reportListFilterByProjectAndVersion.size());
+            }
 
 
 //                            List<org.vaadin.bugrap.domain.entities.Report> reportListFilter = reports.stream()
@@ -294,6 +289,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
 
     }
+    public  Set<Project> findAllProjects () {
+        return bugrapRepository.findProjects();
+    }
 
     public Set<org.vaadin.bugrap.domain.entities.Report> listReports(Project project, ProjectVersion projectVersion, BugrapRepository bugrapRepository) {
         BugrapRepository.ReportsQuery query = new BugrapRepository.ReportsQuery();
@@ -313,20 +311,20 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         Set<Report> reportSet = gridSetComponentValueChangeEvent.getValue();
 
-        data = Arrays.asList(reportSet.toArray(new Report[0]));
-        getModel().setPersons(data);
-
-        if (data.size() == 1) {
-//            detailDiv.setVisible(true);
-//            detailDivDiff.setVisible(false);
-//            Optional<ReportDetail> detail = ReportDetails.getReportDetail(data.get(0).getId());
-////            detail.ifPresent(reportDetail -> detailDiv.setText(reportDetail.getDetail()));
-//            detail.ifPresent(rd -> getModel().setReportDetail(rd));
-        } else {
-            // ask to handle whether in frontend or java server side
-//            detailDiv.setVisible(false);
-//            detailDivDiff.setVisible(true);
-        }
+//        data = Arrays.asList(reportSet.toArray(new Report[0]));
+//        getModel().setPersons(data);
+//
+//        if (data.size() == 1) {
+////            detailDiv.setVisible(true);
+////            detailDivDiff.setVisible(false);
+////            Optional<ReportDetail> detail = ReportDetails.getReportDetail(data.get(0).getId());
+//////            detail.ifPresent(reportDetail -> detailDiv.setText(reportDetail.getDetail()));
+////            detail.ifPresent(rd -> getModel().setReportDetail(rd));
+//        } else {
+//            // ask to handle whether in frontend or java server side
+////            detailDiv.setVisible(false);
+////            detailDivDiff.setVisible(true);
+//        }
 
 //        while (data.hasNext()) {
 //            final Report next = data.next();
@@ -363,7 +361,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
     @Override
     public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
-        getModel().setPersons(data);
+        //getModel().setPersons(data);
     }
 
     /**
