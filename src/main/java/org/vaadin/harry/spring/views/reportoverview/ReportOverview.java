@@ -117,11 +117,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         allProjects.stream().forEach(pr -> {
             listProjects.add(pr.getName());
         });
+
         //set items to project combo box
         projectsComboBox.setItems(listProjects);
         projectsComboBox.setValue(listProjects.get(0));
-
-
 
         // Titles of report table with grid
         reportTable.addColumn(Report::getPriority).setHeader("PRIORITY");
@@ -156,8 +155,16 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         // filter report by clicking Only Me
         this.filterReportByBtnOnlyMe();
+        // filter report by clicking EveryOne
         this.filterReportByBtnEveryOne();
+        // filter report by clicking Only Me
+        this.filterReportByBtnOpen();
+        // filter report by clicking All Kinds
+        this.filterReportByBtnAllkinds();
+        // filter report by clicking Customs
+        this.filterReportByBtnCustoms();
 
+        // Set style for footer
         footerTitle.addClassName("wrapper-subject-fields");
         footerTitle.setWidth("100%");
         footerTitle.setDefaultVerticalComponentAlignment(
@@ -168,7 +175,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         selectType.setLabel("Type");
         status.setLabel("Label");
         versionSelected.setLabel("Version");
-
+        // Set fields titles in Footer for report details
         btnUpdate.addClassName("custom-margin-top");
         btnRevert.addClassName("custom-margin-top");
         footerTitle.add(selectPriority, selectType, status, versionSelected, btnUpdate, btnRevert);
@@ -180,23 +187,84 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         footerTitle.setFlexGrow(1, btnUpdate);
         footerTitle.setFlexGrow(1, btnRevert);
 
+        // Add elements to layout (Footer)
         footerReport.add(footerTitle);
         footerContent.add(author);
         footerContent.add(reportDetails);
         footerReport.add(footerContent);
         wrapperInfo.add(footerReport);
+    }
 
+    private void filterReportByBtnCustoms() {
+    }
 
+    private void filterReportByBtnAllkinds() {
+        btnAllkinds.addClickListener(this::showButtonClicked_allkindsBtn);
+    }
+
+    private void showButtonClicked_allkindsBtn(ClickEvent<Button> buttonClickEvent) {
+        if (reportListFilterByProjectAndVersion.size() > 0) {
+            reportTable.setItems(reportListFilterByProjectAndVersion);
+            this.setVisibleOverviewReport();
+        }
+    }
+
+    private void showButtonClickedMessage_everyone(ClickEvent<Button> buttonClickEvent) {
+        isClicked_onlyMe = false;
+        isClicked_Everyone = true;
+
+        if (reportListFilterByProjectAndVersion.size() > 0) {
+            reportTable.setItems(reportListFilterByProjectAndVersion);
+            this.setVisibleOverviewReport();
+        }
+
+        if (isClicked_Everyone) {
+            btnOnlyMe.setClassName("primary");
+            btnEveryOne.setClassName("clicked-active");
+        }
     }
 
     private void filterReportByBtnEveryOne() {
         btnEveryOne.addClickListener(this::showButtonClickedMessage_everyone);
     }
 
+    private void showButtonClicked_openBtn(ClickEvent<Button> buttonClickEvent) {
+        if (reportListFilterByProjectAndVersion.size() > 0) {
+            List<Report> reportFilterByOpenStatus = reportListFilterByProjectAndVersion
+                    .stream()
+                    .filter(r -> r.getStatus() == null)
+                    .collect(Collectors.toList());
+
+            reportTable.setItems(reportFilterByOpenStatus);
+            System.out.println(reportFilterByOpenStatus.size());
+            this.setVisibleOverviewReport();
+
+        }
+    }
+
+    private void filterReportByBtnOpen() {
+        btnOpen.addClickListener(this::showButtonClicked_openBtn);
+    }
+
+    private void showButtonClickedMessage_onlyMe(ClickEvent<Button> buttonClickEvent) {
+        isClicked_onlyMe = true;
+        isClicked_Everyone = false;
+        if (reportListFilterByProjectAndVersion.size() > 0) {
+            List<Report> reportOnlyMe = reportListFilterByProjectAndVersion
+                    .stream()
+                    .filter(report -> report != null && report.getAssigned() != null && report.getAssigned().getName().toString().toLowerCase().equals("developer"))
+                    .collect(Collectors.toList());
+            reportTable.setItems(reportOnlyMe);
+            this.setVisibleOverviewReport();
+        }
+        if (isClicked_onlyMe) {
+            btnEveryOne.setClassName("primary");
+            btnOnlyMe.setClassName("clicked-active");
+        }
+    }
+
     private void filterReportByBtnOnlyMe() {
         btnOnlyMe.addClickListener(this::showButtonClickedMessage_onlyMe);
-
-
     }
 
     private Set<Project> findAllProjects() {
@@ -325,38 +393,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             //render report detail in overview report in footer with author and description of the selected report
             author.setText( report.getAuthor() != null ? report.getAuthor().getName().toString() : "Unknown");
             reportDetails.setText(report.getDescription() != null ? report.getDescription().toString() : "No description");
-        }
-    }
-
-    private void showButtonClickedMessage_onlyMe(ClickEvent<Button> buttonClickEvent) {
-        isClicked_onlyMe = true;
-        isClicked_Everyone = false;
-        if (reportListFilterByProjectAndVersion.size() > 0) {
-            List<Report> reportOnlyMe = reportListFilterByProjectAndVersion
-                    .stream()
-                    .filter(report -> report != null && report.getAssigned() != null && report.getAssigned().getName().toString().toLowerCase().equals("developer"))
-                    .collect(Collectors.toList());
-            reportTable.setItems(reportOnlyMe);
-            this.setVisibleOverviewReport();
-        }
-        if (isClicked_onlyMe) {
-            btnEveryOne.setClassName("primary");
-            btnOnlyMe.setClassName("clicked-active");
-        }
-    }
-
-    private void showButtonClickedMessage_everyone(ClickEvent<Button> buttonClickEvent) {
-        isClicked_onlyMe = false;
-        isClicked_Everyone = true;
-
-        if (reportListFilterByProjectAndVersion.size() > 0) {
-            reportTable.setItems(reportListFilterByProjectAndVersion);
-            this.setVisibleOverviewReport();
-        }
-
-        if (isClicked_Everyone) {
-            btnOnlyMe.setClassName("primary");
-            btnEveryOne.setClassName("clicked-active");
         }
     }
 
