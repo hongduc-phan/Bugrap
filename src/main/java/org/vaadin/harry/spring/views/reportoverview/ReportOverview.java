@@ -3,6 +3,7 @@ package org.vaadin.harry.spring.views.reportoverview;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -92,7 +93,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private static Select<String> status = new Select<>();
     private static Select<String> versionSelected = new Select<>();
     private static Select<String> selectType = new Select<>();
-
+    private static HorizontalLayout footerContent = new HorizontalLayout();
+    private static Text author = new Text("");
+    private static Paragraph reportDetails = new Paragraph();
     /**
      * Creates a new ReportOverview.
      */
@@ -144,65 +147,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         // event Click of Select component to select project version
         this.filterReportByVersion(projectSelected);
 
-
-//                        List<org.vaadin.bugrap.domain.entities.Report> listReports =
-//                                (List<org.vaadin.bugrap.domain.entities.Report>) vaadinSelect.addValueChangeListener(ver -> {
-//                            List<org.vaadin.bugrap.domain.entities.Report> reports =
-//                                    this.listReports(pro, (ProjectVersion) ver, bugrapRepository);
-//
-//                                    // in order to hide the report overview detail in footer
-//                                    if (gridTable.getSelectedItems().isEmpty()) {
-//                                        wrapperOverview.setVisible(false);
-//                                    }
-//
-//                                    gridTable.addColumn(Report::getPriority).setHeader("PRIORITY");
-//                                    gridTable.addColumn(Report::getType).setFlexGrow(0).setWidth("100px").setHeader("TYPE");
-//                                    gridTable.addColumn(Report::getSummary).setHeader("SUMMARY");
-//                                    gridTable.addColumn(Report::getAssign).setFlexGrow(0).setWidth("100px").setHeader("ASSIGNED TO");
-//                                    gridTable.addColumn(Report::getLastModified).setHeader("LAST MODIFIED").setWidth("140px");
-//                                    gridTable.addColumn(Report::getTime).setHeader("REPORTED").setWidth("140px");
-//
-//                                    gridTable.setItems(Reports.getReports());
-//                        });
-
-
-//
-//
-//                            List<org.vaadin.bugrap.domain.entities.Report> reportListFilter = reports.stream()
-//                                    .filter(r -> projectSelected.equalsIgnoreCase(r.getProject().toString()))
-//                                    .filter(reportFilter -> reportFilter.getProject() != null && reportFilter.getVersion().toString().toLowerCase().equals(projectVersionSelected.toLowerCase()))
-//                                    .collect(Collectors.toList());
-
-        // filter report by project version
-//                            List<org.vaadin.bugrap.domain.entities.Report> reportFilterByProjectAndVersion = reportListFilterNotNull.stream()
-//                            .filter(reportFilterbyVersion -> reportFilterbyVersion.getVersion().getVersion().toString().toLowerCase().equals(projectVersionSelected.toLowerCase()))
-//                            .collect(Collectors.toList());
-
-//                            BugrapRepository.ReportsQuery query = new BugrapRepository.ReportsQuery();
-//                            query.project = pro;
-        // query.projectVersion = first.get();
-//                            Set<org.vaadin.bugrap.domain.entities.Report> reportsList = bugrapRepository.findReports(query);
-
-        // add titles to grid table
-//                            gridTable.addColumn(Report::getPriority).setHeader("PRIORITY");
-//                            gridTable.addColumn(Report::getType).setFlexGrow(0).setWidth("100px").setHeader("TYPE");
-//                                    gridTable.addColumn(Report::getSummary).setHeader("SUMMARY");
-//                                    gridTable.addColumn(Report::getAssign).setFlexGrow(0).setWidth("100px").setHeader("ASSIGNED TO");
-//                                    gridTable.addColumn(Report::getLastModified).setHeader("LAST MODIFIED").setWidth("140px");
-//                                    gridTable.addColumn(Report::getTime).setHeader("REPORTED").setWidth("140px");
-
-//        // in order to hide the report overview detail in footer
-//        if (gridTable.getSelectedItems().isEmpty()) {
-//            wrapperOverview.setVisible(false);
-//        }
-
-        // projectsComboBox.setValue("Google Chrome");
-
-//        vaadinTextField.addValueChangeListener((e -> System.out.println(e.getValue())));
-////        vaadinSelect.addValueChangeListener(
-////                e -> {
-////                    Set<ProjectVersion> projectVersions = bugrapRepository.findProjectVersions((Project) e.getValue());
-////                });
+        // UIs
         vaadinProgressBar.setValue(0.15);
 
         btnOnlyMe.addClickListener(this::showButtonClickedMessage_onlyMe);
@@ -234,9 +179,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         footerTitle.setFlexGrow(1, btnRevert);
 
         footerReport.add(footerTitle);
-        HorizontalLayout footerContent = new HorizontalLayout();
-        Paragraph reportDetails = new Paragraph();
-        reportDetails.setText("demo......");
+        footerContent.add(author);
         footerContent.add(reportDetails);
         footerReport.add(footerContent);
         wrapperInfo.add(footerReport);
@@ -366,6 +309,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                     ? " " : report.getType().toString());
             versionSelected.setValue((report.getVersion() == null)
                     ? " " : report.getVersion().toString());
+
+            //render report detail in overview report in footer with author and description of the selected report
+            author.setText( report.getAuthor() != null ? report.getAuthor().getName().toString() : "Unknown");
+            reportDetails.setText(report.getDescription() != null ? report.getDescription().toString() : "No description");
         }
     }
 
