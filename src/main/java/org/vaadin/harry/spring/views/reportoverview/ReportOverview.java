@@ -25,8 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.vaadin.bugrap.domain.BugrapRepository;
 import org.vaadin.bugrap.domain.entities.Project;
 import org.vaadin.bugrap.domain.entities.ProjectVersion;
-
-
 import org.vaadin.bugrap.domain.entities.Report;
 
 import java.util.ArrayList;
@@ -91,9 +89,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private static VerticalLayout footerReport = new VerticalLayout();
     private static HorizontalLayout footerTitle = new HorizontalLayout();
     private static Select<String> selectPriority = new Select<>();
-    private static  Select<String> status = new Select<>();
+    private static Select<String> status = new Select<>();
     private static Select<String> versionSelected = new Select<>();
     private static Select<String> selectType = new Select<>();
+
     /**
      * Creates a new ReportOverview.
      */
@@ -144,7 +143,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         // event Click of Select component to select project version
         this.filterReportByVersion(projectSelected);
-
 
 
 //                        List<org.vaadin.bugrap.domain.entities.Report> listReports =
@@ -211,28 +209,16 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         btnEveryOne.addClickListener(this::showButtonClickedMessage_everyone);
 
 
-
-
-
-
         footerTitle.addClassName("wrapper-subject-fields");
         footerTitle.setWidth("100%");
         footerTitle.setDefaultVerticalComponentAlignment(
                 FlexComponent.Alignment.CENTER);
 
-
+        // Set labels for overview report in Footer
         selectPriority.setLabel("Priorrity");
-
         selectType.setLabel("Type");
-        selectType.setItems("a", "b", "c");
-
-
         status.setLabel("Label");
-        status.setItems("a", "b", "c");
-
-
         versionSelected.setLabel("Version");
-        versionSelected.setItems("a", "b", "c");
 
         Button btnUpdate = new Button("Update");
         Button btnRevert = new Button("Revert");
@@ -266,23 +252,23 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                                                                 AtomicReference<String> projectSelected,
                                                                 Set<Project> allProjects,
                                                                 ArrayList<String> listVersions) {
-            projectSelected.set(projectsComboBox.getValue());
-            Optional<Project> project = allProjects.stream().filter(p -> {
-                return p.getName().toLowerCase().equals(projectsComboBox.getValue().toLowerCase());
-            }).findFirst();
-            System.out.println(project);
-            project.ifPresent(pro -> {
-                projectVersions.set(bugrapRepository.findProjectVersions(pro));
+        projectSelected.set(projectsComboBox.getValue());
+        Optional<Project> project = allProjects.stream().filter(p -> {
+            return p.getName().toLowerCase().equals(projectsComboBox.getValue().toLowerCase());
+        }).findFirst();
+        System.out.println(project);
+        project.ifPresent(pro -> {
+            projectVersions.set(bugrapRepository.findProjectVersions(pro));
 
-                projectVersions.get().forEach(version -> {
-                    listVersions.add(version.getVersion());
-                });
-
-                selectVersion.setItems(listVersions);
-                selectVersion.setValue(listVersions.get(0));
-                System.out.println(listVersions.get(0));
+            projectVersions.get().forEach(version -> {
+                listVersions.add(version.getVersion());
             });
-            this.setVisibleOverviewReport();
+
+            selectVersion.setItems(listVersions);
+            selectVersion.setValue(listVersions.get(0));
+            System.out.println(listVersions.get(0));
+        });
+        this.setVisibleOverviewReport();
     }
 
     private void filterReportByProject(AtomicReference<Set<ProjectVersion>> projectVersions,
@@ -347,25 +333,40 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         return reports;
     }
 
-    private  void setVisibleOverviewReport () {
+    private void setVisibleOverviewReport() {
         if (reportTable.getSelectedItems().isEmpty()) {
             wrapperOverview.setVisible(false);
         } else {
             wrapperOverview.setVisible(true);
         }
     }
+
     private void clickRow(AbstractField.ComponentValueChangeEvent<Grid<Report>, Set<Report>> gridSetComponentValueChangeEvent) {
-       this.setVisibleOverviewReport();
+        this.setVisibleOverviewReport();
 
         Set<Report> reportSet = gridSetComponentValueChangeEvent.getValue();
 
+        // if selected 1 row
         if (reportSet.size() == 1) {
-            reportSet.forEach( r -> {
-                selectPriority.setValue("prei");
-            });
+            Report report = reportSet.stream().findFirst().get();
+            selectPriority.setItems(StringUtils.isEmpty(report.getPriority().toString())
+                    ? " " : report.getPriority().toString());
+            selectType.setItems(StringUtils.isEmpty(report.getType().toString())
+                    ? " " : report.getPriority().toString());
+            status.setItems((report.getStatus() == null)
+                    ? " " : report.getType().toString());
+            versionSelected.setItems((report.getVersion() == null)
+                    ? " " : report.getVersion().toString());
+
+            selectPriority.setValue(StringUtils.isEmpty(report.getPriority().toString())
+                    ? " " : report.getPriority().toString());
+            selectType.setValue(StringUtils.isEmpty(report.getType().toString())
+                    ? " " : report.getPriority().toString());
+            status.setValue((report.getStatus() == null)
+                    ? " " : report.getType().toString());
+            versionSelected.setValue((report.getVersion() == null)
+                    ? " " : report.getVersion().toString());
         }
-
-
     }
 
 
