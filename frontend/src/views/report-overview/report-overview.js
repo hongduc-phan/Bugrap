@@ -71,9 +71,7 @@ background: none;">
     </div>
     <vaadin-select style="width:70%;" id="select-project"></vaadin-select>
    </vaadin-horizontal-layout>
-   <vaadin-horizontal-layout theme="margin" style="width:80%; display:flex; align-items: center; justify-content: flex-end;  border-radius: 10px;">
-    <vaadin-progress-bar style="width: 100%; height: 24px; color: grey" id="overview-project"></vaadin-progress-bar>
-   </vaadin-horizontal-layout>
+   <vaadin-horizontal-layout theme="margin" style="width:80%; display:flex; align-items: center; justify-content: flex-end;  border-radius: 10px;" id="wrapper-distribution-bar"></vaadin-horizontal-layout>
   </vaadin-horizontal-layout>
   <vaadin-horizontal-layout theme="margin" style="width: 100%; padding: 8px">
    <div>

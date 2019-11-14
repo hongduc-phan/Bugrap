@@ -15,7 +15,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.polymertemplate.Id;
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
-import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.dom.Element;
@@ -27,6 +26,7 @@ import org.vaadin.bugrap.domain.BugrapRepository;
 import org.vaadin.bugrap.domain.entities.Project;
 import org.vaadin.bugrap.domain.entities.ProjectVersion;
 import org.vaadin.bugrap.domain.entities.Report;
+import org.vaadin.harry.ProgressBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +59,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private static TextField vaadinTextField;
     @Id("select-project")
     private static Select selectVersion;
-    @Id("overview-project")
-    private static ProgressBar vaadinProgressBar;
+//    @Id("overview-project")
+//    private static ProgressBar vaadinProgressBar;
+
     @Id("btn-onlyme")
     private static Button btnOnlyMe;
     @Id("btn-everyone")
@@ -103,6 +104,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private static AtomicReference<String> projectSelected = new AtomicReference(new ArrayList<>());
     private static ArrayList<String> listVersions = new ArrayList<>();
     private static List<Report> reportListFilterByProjectAndVersion = new ArrayList<Report>();
+    @Id("wrapper-distribution-bar")
+    private HorizontalLayout wraperDistributionBar;
+
     /**
      * Creates a new ReportOverview.
      */
@@ -150,8 +154,14 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         // event Click of Select component to select project version
         this.filterReportByVersion(projectSelected);
 
-        // UIs
-        vaadinProgressBar.setValue(0.15);
+//        // UIs
+//        vaadinProgressBar.setValue(0.15);
+        if (reportListFilterByProjectAndVersion.size() == 0) {
+            org.vaadin.harry.ProgressBar progressBar
+                    = new ProgressBar(200, 1000,1, 1, 1);
+
+            wraperDistributionBar.add(progressBar);
+        }
 
         // filter report by clicking Only Me
         this.filterReportByBtnOnlyMe();
