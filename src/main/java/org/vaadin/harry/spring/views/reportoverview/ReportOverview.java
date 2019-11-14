@@ -15,7 +15,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.polymertemplate.Id;
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
-import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.dom.Element;
@@ -27,11 +26,13 @@ import org.vaadin.bugrap.domain.BugrapRepository;
 import org.vaadin.bugrap.domain.entities.Project;
 import org.vaadin.bugrap.domain.entities.ProjectVersion;
 import org.vaadin.bugrap.domain.entities.Report;
+import org.vaadin.harry.ProgressBar;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -50,59 +51,63 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private static BugrapRepository bugrapRepository = new BugrapRepository("/tmp/bugrap;create=true");
 
     @Id("vaadinComboBox")
-    private static ComboBox<String> projectsComboBox;
+    private  ComboBox<String> projectsComboBox;
     @Id("vaadinButtonLogout")
-    private static Button vaadinButtonLogout;
+    private  Button vaadinButtonLogout;
     @Id("vaadinButtonAccount")
-    private static Button vaadinButtonAccount;
+    private  Button vaadinButtonAccount;
     @Id("search")
-    private static TextField vaadinTextField;
+    private  TextField vaadinTextField;
     @Id("select-project")
-    private static Select selectVersion;
-    @Id("overview-project")
-    private static ProgressBar vaadinProgressBar;
+    private  Select selectVersion;
+//    @Id("overview-project")
+//    private static ProgressBar vaadinProgressBar;
+
     @Id("btn-onlyme")
-    private static Button btnOnlyMe;
+    private  Button btnOnlyMe;
     @Id("btn-everyone")
-    private static Button btnEveryOne;
+    private  Button btnEveryOne;
     @Id("btn-open")
-    private static Button btnOpen;
+    private  Button btnOpen;
     @Id("btn-allkinds")
-    private static Button btnAllkinds;
+    private  Button btnAllkinds;
     @Id("btn-custom")
-    private static Button btnCustoms;
+    private  Button btnCustoms;
     @Id("wrapper-overview")
-    private static Element wrapperOverview;
+    private  Element wrapperOverview;
     @Id("wrapper-table")
-    private static Element wrapperTable;
+    private  Element wrapperTable;
 
     private boolean isClicked_onlyMe = false;
     private boolean isClicked_Everyone = false;
     private boolean isClicked_report = false;
     @Id("table")
-    private static Grid<Report> reportTable;
+    private  Grid<Report> reportTable;
     //    @Id("infos-report")
 //    private Element detailDiv;
 //    @Id("infos-report2")
 //    private Element detailDivDiff;
     @Id("wrapper-info")
     private HorizontalLayout wrapperInfo;
-    private static VerticalLayout footerReport = new VerticalLayout();
-    private static HorizontalLayout footerTitle = new HorizontalLayout();
-    private static Select<String> selectPriority = new Select<>();
-    private static Select<String> status = new Select<>();
-    private static Select<String> versionSelected = new Select<>();
-    private static Select<String> selectType = new Select<>();
-    private static HorizontalLayout footerContent = new HorizontalLayout();
-    private static Text author = new Text("");
-    private static Paragraph reportDetails = new Paragraph();
-    private static Button btnUpdate = new Button("Update");
-    private static Button btnRevert = new Button("Revert");
+    private  VerticalLayout footerReport = new VerticalLayout();
+    private  HorizontalLayout footerTitle = new HorizontalLayout();
+    private  Select<String> selectPriority = new Select<>();
+    private  Select<String> status = new Select<>();
+    private  Select<String> versionSelected = new Select<>();
+    private  Select<String> selectType = new Select<>();
+    private  HorizontalLayout footerContent = new HorizontalLayout();
+    private  Text author = new Text("");
+    private  Paragraph reportDetails = new Paragraph();
+    private  Button btnUpdate = new Button("Update");
+    private  Button btnRevert = new Button("Revert");
 
-    private static AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new ProjectVersion());
-    private static AtomicReference<String> projectSelected = new AtomicReference(new ArrayList<>());
-    private static ArrayList<String> listVersions = new ArrayList<>();
-    private static List<Report> reportListFilterByProjectAndVersion = new ArrayList<Report>();
+    private  AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new ProjectVersion());
+    private  AtomicReference<String> projectSelected = new AtomicReference(new ArrayList<>());
+    private  ArrayList<String> listVersions = new ArrayList<>();
+    private  List<Report> reportListFilterByProjectAndVersion = new ArrayList<Report>();
+    @Id("wrapper-distribution-bar")
+    private HorizontalLayout wraperDistributionBar;
+
     /**
      * Creates a new ReportOverview.
      */
@@ -150,8 +155,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         // event Click of Select component to select project version
         this.filterReportByVersion(projectSelected);
 
-        // UIs
-        vaadinProgressBar.setValue(0.15);
+//        // UIs
+//        vaadinProgressBar.setValue(0.15);
+        this.showStatusDistributionBar(0,0,0);
 
         // filter report by clicking Only Me
         this.filterReportByBtnOnlyMe();
@@ -193,6 +199,38 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         footerContent.add(reportDetails);
         footerReport.add(footerContent);
         wrapperInfo.add(footerReport);
+    }
+
+    private void showStatusDistributionBar(int first, int second, int third) {
+        if (reportListFilterByProjectAndVersion.size() == 0) {
+            wraperDistributionBar.removeAll();
+            ProgressBar progressBar = new ProgressBar(200, 1000, first, second, third);
+            wraperDistributionBar.add(progressBar);
+        }
+        else {
+            AtomicInteger closed = new AtomicInteger();
+            AtomicInteger nonResolved = new AtomicInteger();
+            AtomicInteger unassigned = new AtomicInteger();
+            reportListFilterByProjectAndVersion.stream().forEach( r -> {
+                if (r.getStatus() == null) {
+                    unassigned.addAndGet(1);
+                }
+                else if (r.getStatus().toString().toLowerCase().equals("won't fix") ||
+                        r.getStatus().toString().toLowerCase().equals("duplicate")) {
+                    nonResolved.addAndGet(1);
+                }
+                else {
+                    closed.addAndGet(1);
+                }
+            });
+            int firstClosed = closed.intValue();
+            int secondNonResolved = nonResolved.intValue();
+            int thirdUnassigned = unassigned.intValue();
+            wraperDistributionBar.removeAll();
+            ProgressBar progressBar = new ProgressBar(200, 1000, firstClosed, secondNonResolved, thirdUnassigned);
+            wraperDistributionBar.add(progressBar);
+        }
+
     }
 
     private void filterReportByBtnCustoms() {
@@ -345,6 +383,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                 reportTable.setItems(reportListFilterByProjectAndVersion);
                 this.setVisibleOverviewReport();
             }
+            this.showStatusDistributionBar(1,1,1);
         });
     }
 
