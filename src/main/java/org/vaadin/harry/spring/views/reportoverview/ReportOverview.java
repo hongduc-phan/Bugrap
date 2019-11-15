@@ -29,12 +29,14 @@ import org.vaadin.bugrap.domain.entities.Report;
 import org.vaadin.harry.ProgressBar;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A Designer generated component for the report-overview template.
@@ -91,10 +93,12 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private HorizontalLayout wrapperInfo;
     private  VerticalLayout footerReport = new VerticalLayout();
     private  HorizontalLayout footerTitle = new HorizontalLayout();
-    private  Select<String> selectPriority = new Select<>();
-    private  Select<String> status = new Select<>();
+
+    private  Select<Report.Priority> selectPriority = new Select<>();
+    private  Select<Report.Status> status = new Select<>();
     private  Select<String> versionSelected = new Select<>();
-    private  Select<String> selectType = new Select<>();
+    private  Select<Report.Type> selectType = new Select<>();
+
     private  HorizontalLayout footerContent = new HorizontalLayout();
     private  Text author = new Text("");
     private  Paragraph reportDetails = new Paragraph();
@@ -134,6 +138,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         reportTable.addColumn(Report::getAssigned).setFlexGrow(0).setWidth("160px").setHeader("ASSIGNED TO");
         reportTable.addColumn(Report::getReportedTimestamp).setHeader("LAST MODIFIED").setWidth("140px");
         reportTable.addColumn(Report::getTimestamp).setHeader("REPORTED").setWidth("140px");
+
+        selectPriority.setItems(Report.Priority.values());
+        status.setItems(Report.Status.values());
+        selectType.setItems(Report.Type.values());
 
         this.setValueForProjectAndVersionWithoutClickEvents(projectVersions,
                 projectSelected,
@@ -274,7 +282,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                     .collect(Collectors.toList());
 
             reportTable.setItems(reportFilterByOpenStatus);
-            System.out.println(reportFilterByOpenStatus.size());
             this.setVisibleOverviewReport();
 
         }
@@ -317,7 +324,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         Optional<Project> project = allProjects.stream().filter(p -> {
             return p.getName().toLowerCase().equals(projectsComboBox.getValue().toLowerCase());
         }).findFirst();
-        System.out.println(project);
         project.ifPresent(pro -> {
             projectVersions.set(bugrapRepository.findProjectVersions(pro));
 
@@ -327,7 +333,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
             selectVersion.setItems(listVersions);
             selectVersion.setValue(listVersions.get(0));
-            System.out.println(listVersions.get(0));
         });
         this.setVisibleOverviewReport();
     }
@@ -363,7 +368,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             Set<org.vaadin.bugrap.domain.entities.Report> reports
                     = this.listReports(null, null, bugrapRepository);
 
-            System.out.println(reports);
             // filter report by project and project version
             // project
             List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject = reports.stream()
@@ -411,21 +415,18 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         // if selected 1 row
         if (reportSet.size() == 1) {
             Report report = reportSet.stream().findFirst().get();
-            selectPriority.setItems(StringUtils.isEmpty(report.getPriority().toString())
-                    ? " " : report.getPriority().toString());
-            selectType.setItems(StringUtils.isEmpty(report.getType().toString())
-                    ? " " : report.getPriority().toString());
-            status.setItems((report.getStatus() == null)
-                    ? " " : report.getType().toString());
-            versionSelected.setItems((report.getVersion() == null)
-                    ? " " : report.getVersion().toString());
+//            selectPriority.setItems(StringUtils.isEmpty(report.getPriority().toString())
+//                    ? " " : report.getPriority().toString());
+//            selectType.setItems(StringUtils.isEmpty(report.getType().toString())
+//                    ? " " : report.getPriority().toString());
+//            status.setItems((report.getStatus() == null)
+//                    ? " " : report.getType().toString());
 
-            selectPriority.setValue(StringUtils.isEmpty(report.getPriority().toString())
-                    ? " " : report.getPriority().toString());
-            selectType.setValue(StringUtils.isEmpty(report.getType().toString())
-                    ? " " : report.getPriority().toString());
-            status.setValue((report.getStatus() == null)
-                    ? " " : report.getType().toString());
+            versionSelected.setItems(listVersions);
+
+            selectPriority.setValue(report.getPriority());
+            selectType.setValue(report.getType());
+            status.setValue(report.getStatus());
             versionSelected.setValue((report.getVersion() == null)
                     ? " " : report.getVersion().toString());
 
