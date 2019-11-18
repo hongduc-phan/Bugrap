@@ -2,12 +2,11 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/vaadin-combo-box/src/vaadin-combo-box.js';
 import '@vaadin/vaadin-button/src/vaadin-button.js';
-import '@polymer/iron-icon/iron-icon.js';
-import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
 import '@vaadin/vaadin-select/src/vaadin-select.js';
 import '@vaadin/vaadin-split-layout/src/vaadin-split-layout.js';
 import '@vaadin/vaadin-grid/src/vaadin-grid.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
+import '@polymer/iron-icon/iron-icon.js';
 
 class ReportOverview extends PolymerElement {
 
@@ -56,11 +55,7 @@ background: none;">
      Manage project 
    </div>
   </vaadin-horizontal-layout>
-  <vaadin-horizontal-layout theme="margin" style="width: 50%; display: flex; align-items:center; justify-content: flex-end">
-   <vaadin-text-field placeholder="Search report..." style="width : 80%" id="search">
-    <iron-icon icon="lumo:search" slot="prefix"></iron-icon>
-   </vaadin-text-field>
-  </vaadin-horizontal-layout>
+  <vaadin-horizontal-layout theme="margin" style="width: 50%; display: flex; align-items:center; justify-content: flex-end" id="wrapper-search-bar"></vaadin-horizontal-layout>
  </vaadin-horizontal-layout>
  <div style="width: 100%; height: 1px; background-color: black"></div>
  <vaadin-horizontal-layout theme="margin" style="width: 100%; display: flex; flex-wrap: wrap">

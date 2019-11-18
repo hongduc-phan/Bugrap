@@ -59,8 +59,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private  Button vaadinButtonLogout;
     @Id("vaadinButtonAccount")
     private  Button vaadinButtonAccount;
-    @Id("search")
-    private  TextField vaadinTextField;
+//    @Id("search")
+//    private  TextField vaadinTextField;
+    TextField searchBar = new TextField();
     @Id("select-project")
     private  Select selectVersion;
 //    @Id("overview-project")
@@ -112,13 +113,18 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private  List<Report> reportListFilterByProjectAndVersion = new ArrayList<Report>();
     @Id("wrapper-distribution-bar")
     private HorizontalLayout wraperDistributionBar;
+    @Id("wrapper-search-bar")
+    private HorizontalLayout wrapperSearchBar;
 
     /**
      * Creates a new ReportOverview.
      */
     public ReportOverview() {
         bugrapRepository.populateWithTestData();
-
+        searchBar.setPlaceholder("Searching...");
+        searchBar.getStyle().set("width","80%");
+        searchBar.getStyle().set("margin-right", "16px");
+        wrapperSearchBar.add(searchBar);
         this.setVisibleOverviewReport();
         // find all projects
         Set<Project> allProjects = this.findAllProjects();
@@ -143,6 +149,20 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         selectPriority.setItems(Report.Priority.values());
         status.setItems(Report.Status.values());
         selectType.setItems(Report.Type.values());
+
+        // search bar by Priority or type, assigned to
+        searchBar.addValueChangeListener(e -> {
+            System.out.println(e.getValue());
+            if (reportListFilterByProjectAndVersion.size() > 0) {
+                List<Report> filterReportList = reportListFilterByProjectAndVersion.stream().filter(r ->  (r.getVersion() != null && r.getVersion().getVersion().equalsIgnoreCase(e.getValue()))
+                        || (r.getPriority() != null && r.getPriority().toString().equalsIgnoreCase(e.getValue()))
+                        || (r.getType() != null && r.getType().toString().equalsIgnoreCase(e.getValue()))
+                        || (r.getSummary() != null && r.getSummary().contains(e.getValue()))
+                        || (r.getAssigned() != null && r.getAssigned().getName().contains(e.getValue()))).collect(Collectors.toList());
+                reportTable.setItems(filterReportList);
+            }
+
+        });
 
         this.setValueForProjectAndVersionWithoutClickEvents(this.projectVersions,
                 allProjects,
