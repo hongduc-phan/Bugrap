@@ -1,0 +1,15 @@
+.clicked-active{
+    background-color: grey;
+}
+.primary {
+    background-color: darkgray;
+}
+.wrapper-subject-fields {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+.custom-margin-top {
+    margin-top: 33px;
+}
