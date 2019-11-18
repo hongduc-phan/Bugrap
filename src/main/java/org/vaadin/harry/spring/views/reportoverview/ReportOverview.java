@@ -11,6 +11,8 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -59,13 +61,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private  Button vaadinButtonLogout;
     @Id("vaadinButtonAccount")
     private  Button vaadinButtonAccount;
-//    @Id("search")
-//    private  TextField vaadinTextField;
     TextField searchBar = new TextField();
     @Id("select-project")
     private  Select selectVersion;
-//    @Id("overview-project")
-//    private static ProgressBar vaadinProgressBar;
 
     @Id("btn-onlyme")
     private  Button btnOnlyMe;
@@ -87,10 +85,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private boolean isClicked_report = false;
     @Id("table")
     private  Grid<Report> reportTable;
-    //    @Id("infos-report")
-//    private Element detailDiv;
-//    @Id("infos-report2")
-//    private Element detailDivDiff;
     @Id("wrapper-info")
     private HorizontalLayout wrapperInfo;
     private  VerticalLayout footerReport = new VerticalLayout();
@@ -121,6 +115,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
      */
     public ReportOverview() {
         bugrapRepository.populateWithTestData();
+        Icon icon = VaadinIcon.SEARCH.create();
+        searchBar.setPrefixComponent(icon);
+        searchBar.setClearButtonVisible(true);
         searchBar.setPlaceholder("Searching...");
         searchBar.getStyle().set("width","80%");
         searchBar.getStyle().set("margin-right", "16px");
@@ -376,11 +373,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                         this.projectVersions.get().stream().forEach(version -> {
                             listVersions.add(version.getVersion());
                         });
-                        //vaadinSelect.setItems();
+
                         selectVersion.setValue((listVersions.get(0)));
                         this.setVisibleOverviewReport();
 
-                        //filter report by project and version
                         this.filterReportByProjectAndVersion(projectSelected.get(), listVersions.get(0));
                     });
                     this.showStatusDistributionBar(0,0,0);
@@ -389,12 +385,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
     private void filterReportByProjectAndVersion (String projectSelected, String version) {
         String projectVersionSelected = version;
-        // projectVersions.get().stream().filter(v -> v.getVersion().equals(version.getValue())).findFirst();
         Set<org.vaadin.bugrap.domain.entities.Report> reports
                 = this.listReports(null, null, bugrapRepository);
 
-        // filter report by project and project version
-        // project
         List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject = reports.stream()
                 .filter(rl -> rl.getProject() != null)
                 .filter(r -> projectSelected.equalsIgnoreCase(r.getProject().getName()))
@@ -476,12 +469,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             reportUpdated = getReport.iterator().next();
             Report oldReport =  reportUpdated;
             String currentVersion = reportUpdated.getVersion().getVersion();
-//            selectPriority.setItems(StringUtils.isEmpty(report.getPriority().toString())
-//                    ? " " : report.getPriority().toString());
-//            selectType.setItems(StringUtils.isEmpty(report.getType().toString())
-//                    ? " " : report.getPriority().toString());
-//            status.setItems((report.getStatus() == null)
-//                    ? " " : report.getType().toString());
 
             versionSelected.setItems( this.projectVersions.get());
 
@@ -543,17 +530,12 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
     @Override
     public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
-        //getModel().setPersons(data);
     }
 
     /**
      * This model binds properties between ReportOverview and report-overview
      */
     public interface ReportOverviewModel extends TemplateModel {
-        // Add setters and getters for template properties here.
-//        void setPersons(List<org.vaadin.bugrap.domain.entities.Report> data);
-//
-//        void setReportDetail(ReportDetail detail);
     }
 
 }

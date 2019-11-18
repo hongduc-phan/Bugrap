@@ -18,9 +18,6 @@ class ReportOverview extends PolymerElement {
                     height: 100%;
                     width: 100%;
                 }
-                /*.vaadin-text-field-container : {*/
-                /*    background-color: white;*/
-                /*}*/
             </style>
 <vaadin-vertical-layout style="width: 100%;">
  <vaadin-horizontal-layout theme="spacing" style="width: 100%; background-color:grey;height: 24px"></vaadin-horizontal-layout>
@@ -97,12 +94,6 @@ background: none;">
    </div>
    <div id="wrapper-overview" style="width: 80%;">
     <vaadin-horizontal-layout theme="spacing" id="wrapper-info">
-     <!--     <div id="infos-report" style="width: 80%;">-->
-     <!--        Detail id: [[reportDetail.id]]<br/>-->
-     <!--        Report id: [[reportDetail.reportId]]<br/>-->
-     <!--        [[reportDetail.detail]] -->
-     <!--    </div>-->
-     <!--    <div id="infos-report2" style="width: 80%;"></div>-->
     </vaadin-horizontal-layout>
    </div>
   </vaadin-split-layout>
@@ -125,26 +116,6 @@ background: none;">
     }
 
     _activeItemChanged(items) {
-        //this.$.list.selectedItems = item ? [item] : [];
-        // console.log(this.$)
-        console.log(items);
-//         if (items) {
-//             this.$['infos-report2'].innerHTML = '';
-//             items.map(i => {
-//                 this.$['infos-report2'].innerHTML += `<div style="display:flex; justify-content:space-between; padding-bottom: 16px; padding-top: 16pxd ">
-//     <div>  ${i.priority}</div>
-//     <div>  ${i.assign}</div>
-//     <div>  ${i.lastModified}</div>
-//     <div>  ${i.summary}</div>
-//     <div>  ${i.time}</div>
-//     <div>  ${i.type}</div>
-// </div>`
-//
-//             }
-//         )
-//         }
-
-
     }
 
 
