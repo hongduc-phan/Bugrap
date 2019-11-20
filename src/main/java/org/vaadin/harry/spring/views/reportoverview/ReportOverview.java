@@ -101,7 +101,8 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private  Paragraph reportDetails = new Paragraph();
     private  Button btnUpdate = new Button("Update");
     private  Button btnRevert = new Button("Revert");
-
+    ConfirmDialog dialogUpdateSucceed = new ConfirmDialog("Update Report",
+            "The report is updated!", "OK", this::onOKUpdate);
     private  AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new ProjectVersion());
     private  AtomicReference<String> projectSelected = new AtomicReference(new ArrayList<>());
     private  ArrayList<String> listVersions = new ArrayList<>();
@@ -476,8 +477,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         // if selected 1 row
         if (getReport.size() == 1) {
-            ConfirmDialog dialogUpdateSucceed = new ConfirmDialog("Update Report",
-                    "The report is updated!", "OK", this::onOKUpdate);
             reportUpdated = getReport.iterator().next();
             Report oldReport =  reportUpdated;
             String currentVersion = reportUpdated.getVersion().getVersion();
