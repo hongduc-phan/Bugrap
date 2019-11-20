@@ -5,6 +5,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -26,12 +27,12 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.templatemodel.TemplateModel;
+import components.ProgressBar;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.bugrap.domain.BugrapRepository;
 import org.vaadin.bugrap.domain.entities.Project;
 import org.vaadin.bugrap.domain.entities.ProjectVersion;
 import org.vaadin.bugrap.domain.entities.Report;
-import org.vaadin.harry.ProgressBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,7 +101,8 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private  Paragraph reportDetails = new Paragraph();
     private  Button btnUpdate = new Button("Update");
     private  Button btnRevert = new Button("Revert");
-
+    ConfirmDialog dialogUpdateSucceed = new ConfirmDialog("Update Report",
+            "The report is updated!", "OK", this::onOKUpdate);
     private  AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new ProjectVersion());
     private  AtomicReference<String> projectSelected = new AtomicReference(new ArrayList<>());
     private  ArrayList<String> listVersions = new ArrayList<>();
@@ -268,6 +270,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private void showButtonClicked_allkindsBtn(ClickEvent<Button> buttonClickEvent) {
         if (reportListFilterByProjectAndVersion.size() > 0) {
             reportTable.setItems(reportListFilterByProjectAndVersion);
+            btnAllkinds.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnOpen.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnEveryOne.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnOnlyMe.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
             this.setVisibleOverviewReport();
         }
     }
@@ -282,8 +288,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         }
 
         if (isClicked_Everyone) {
-            btnOnlyMe.setClassName("primary");
-            btnEveryOne.setClassName("clicked-active");
+            btnOpen.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnAllkinds.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnEveryOne.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnOnlyMe.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
         }
     }
 
@@ -293,6 +301,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
     private void showButtonClicked_openBtn(ClickEvent<Button> buttonClickEvent) {
         if (reportListFilterByProjectAndVersion.size() > 0) {
+            btnOpen.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnAllkinds.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnEveryOne.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnOnlyMe.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
             List<Report> reportFilterByOpenStatus = reportListFilterByProjectAndVersion
                     .stream()
                     .filter(r -> r.getStatus() == null)
@@ -320,8 +332,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             this.setVisibleOverviewReport();
         }
         if (isClicked_onlyMe) {
-            btnEveryOne.setClassName("primary");
-            btnOnlyMe.setClassName("clicked-active");
+            btnOpen.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnAllkinds.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnOnlyMe.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            btnEveryOne.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
         }
     }
 
@@ -463,8 +477,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         // if selected 1 row
         if (getReport.size() == 1) {
-            ConfirmDialog dialogUpdateSucceed = new ConfirmDialog("Update Report",
-                    "The report is updated!", "OK", this::onOKUpdate);
             reportUpdated = getReport.iterator().next();
             Report oldReport =  reportUpdated;
             String currentVersion = reportUpdated.getVersion().getVersion();
