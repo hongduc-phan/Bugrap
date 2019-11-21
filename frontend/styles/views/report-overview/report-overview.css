@@ -1,6 +1,12 @@
-.clicked-active{
-    background-color: grey;
+:host {
+    --lumo-primary-color: green;
+    --lumo-primary-contrast-color: white;
 }
+* {
+    font-weight: bold;
+    font-size: 10px;
+}
+
 .primary {
     background-color: darkgray;
 }
