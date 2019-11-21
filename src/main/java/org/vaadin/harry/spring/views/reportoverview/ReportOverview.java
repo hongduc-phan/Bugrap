@@ -469,67 +469,86 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     }
 
     private Report reportUpdated = new Report();
+
+    // Method binding data to 4 fields Priority, Status, Type and Version
+    private void bindingDataForFileds (Binder<Report> binderReport) {
+        selectPriority.addValueChangeListener( e -> {
+            binderReport.forField(selectPriority)
+                    .bind(Report::getPriority, Report::setPriority);
+        });
+        selectType.addValueChangeListener( e -> {
+            binderReport.forField(selectType)
+                    .bind(Report::getType, Report::setType);
+        });
+        status.addValueChangeListener( e -> {
+            binderReport.forField(status)
+                    .bind(Report::getStatus, Report::setStatus);
+        });
+        versionSelected.addValueChangeListener( e -> {
+            binderReport.forField(versionSelected)
+                    .bind(Report::getVersion, Report::setVersion);
+        });
+
+    }
+
+    private void clickRevertBtn (Report oldReport) {
+        btnRevert.addClickListener(e -> {
+            selectPriority.setValue(oldReport.getPriority());
+            selectType.setValue(oldReport.getType());
+            status.setValue(oldReport.getStatus());
+            versionSelected.setValue(oldReport.getVersion());
+        });
+    }
+
+    private void clickUpdateBtn (Binder<Report> binderReport, String currentVersion) {
+        btnUpdate.addClickListener(e -> {
+            try {
+                binderReport.writeBean(reportUpdated);
+                reportUpdated = bugrapRepository.save(reportUpdated);
+                this.filterReportByProjectAndVersion(reportUpdated.getProject().toString(), currentVersion);
+                dialogUpdateSucceed.open();
+
+            } catch (ValidationException ex) {
+                ex.printStackTrace();
+            }
+        });
+    }
+
+    private  void implementSelectOneRow (Set<Report> getReport) {
+        reportUpdated = getReport.iterator().next();
+        Report oldReport =  reportUpdated;
+        String currentVersion = reportUpdated.getVersion().getVersion();
+
+        versionSelected.setItems( this.projectVersions.get());
+
+        selectPriority.setValue(reportUpdated.getPriority());
+        selectType.setValue(reportUpdated.getType());
+        status.setValue(reportUpdated.getStatus());
+        versionSelected.setValue(reportUpdated.getVersion());
+
+        //render report detail in overview report in footer with author and description of the selected report
+        author.setText( reportUpdated.getAuthor() != null ? reportUpdated.getAuthor().getName().toString() : "Unknown");
+        reportDetails.setText(reportUpdated.getDescription() != null ? reportUpdated.getDescription().toString() : "No description");
+
+        //binding data to 4 fields Priority, Status, Type and Version
+        Binder<Report> binderReport = new Binder<Report>();
+        this.bindingDataForFileds(binderReport);
+
+        // trigger Revert Button
+        this.clickRevertBtn(oldReport);
+
+        // trigger Update Button
+        this.clickUpdateBtn (binderReport, currentVersion);
+    }
+
     private void clickRow(AbstractField.ComponentValueChangeEvent<Grid<Report>, Set<Report>> gridSetComponentValueChangeEvent) {
         this.setVisibleOverviewReport();
 
         Set<Report> getReport = gridSetComponentValueChangeEvent.getValue();
 
         // if selected 1 row
-        if (getReport.size() == 1) {
-            reportUpdated = getReport.iterator().next();
-            Report oldReport =  reportUpdated;
-            String currentVersion = reportUpdated.getVersion().getVersion();
-
-            versionSelected.setItems( this.projectVersions.get());
-
-            selectPriority.setValue(reportUpdated.getPriority());
-            selectType.setValue(reportUpdated.getType());
-            status.setValue(reportUpdated.getStatus());
-            versionSelected.setValue(reportUpdated.getVersion());
-
-            //render report detail in overview report in footer with author and description of the selected report
-            author.setText( reportUpdated.getAuthor() != null ? reportUpdated.getAuthor().getName().toString() : "Unknown");
-            reportDetails.setText(reportUpdated.getDescription() != null ? reportUpdated.getDescription().toString() : "No description");
-
-            Binder<Report> binderReport = new Binder<Report>();
-
-            selectPriority.addValueChangeListener( e -> {
-                binderReport.forField(selectPriority)
-                        .bind(Report::getPriority, Report::setPriority);
-            });
-            selectType.addValueChangeListener( e -> {
-                binderReport.forField(selectType)
-                        .bind(Report::getType, Report::setType);
-            });
-            status.addValueChangeListener( e -> {
-                binderReport.forField(status)
-                        .bind(Report::getStatus, Report::setStatus);
-            });
-            versionSelected.addValueChangeListener( e -> {
-                binderReport.forField(versionSelected)
-                        .bind(Report::getVersion, Report::setVersion);
-            });
-
-            // trigger Revert Button
-            btnRevert.addClickListener(e -> {
-                selectPriority.setValue(oldReport.getPriority());
-                selectType.setValue(oldReport.getType());
-                status.setValue(oldReport.getStatus());
-                versionSelected.setValue(oldReport.getVersion());
-            });
-
-            // trigger Update Button
-            btnUpdate.addClickListener(e -> {
-                try {
-                    binderReport.writeBean(reportUpdated);
-                    reportUpdated = bugrapRepository.save(reportUpdated);
-                    this.filterReportByProjectAndVersion(reportUpdated.getProject().toString(), currentVersion);
-                    dialogUpdateSucceed.open();
-
-                } catch (ValidationException ex) {
-                    ex.printStackTrace();
-                }
-            });
+        if (gridSetComponentValueChangeEvent.getValue().size() == 1) {
+            this.implementSelectOneRow(getReport);
         }
     }
 
