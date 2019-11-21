@@ -489,12 +489,23 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
     }
 
+    // Revert button (function) for clicking one row
     private void clickRevertBtnForOneRow(Report oldReport) {
         btnRevert.addClickListener(e -> {
             selectPriority.setValue(oldReport.getPriority());
             selectType.setValue(oldReport.getType());
             status.setValue(oldReport.getStatus());
             versionSelected.setValue(oldReport.getVersion());
+        });
+    }
+
+    // Revert button (function) for clicking one row
+    private void clickRevertBtnForMultiRows(Report report) {
+        btnRevert.addClickListener(e -> {
+            selectPriority.setValue(report.getPriority());
+            selectType.setValue(report.getType());
+            this.status.setValue(report.getStatus());
+            versionSelected.setValue(report.getVersion());
         });
     }
 
@@ -546,7 +557,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         String currentVersion = firstReport.getVersion().getVersion();
 
         versionSelected.setItems(this.projectVersions.get());
-        boolean isAllPriorityDiff = true, isAllStatusDiff = true, isAllType = true;
+        boolean isAllPrioritySame = true, isAllStatusSame = true, isAllTypeSame = true;
 
         for (int i = 0; i < reportsUpdated.size() - 1; i++) {
             for (int k = i + 1; k < reportsUpdated.size(); k++) {
@@ -554,46 +565,64 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                 // Check Priority, Status and Type whether diff or not
                 //Priority
                 if (reportsUpdated.get(i).getPriority() != null && reportsUpdated.get(k).getPriority() != null) {
-                    isAllPriorityDiff = reportsUpdated.get(i).getPriority().toString()
+                    isAllPrioritySame = reportsUpdated.get(i).getPriority().toString()
                             .equalsIgnoreCase(reportsUpdated.get(k).getPriority().toString());
                 }
 
                 // Status
                 if (reportsUpdated.get(i).getStatus() != null && reportsUpdated.get(k).getStatus() != null) {
-                    isAllStatusDiff = reportsUpdated.get(i).getStatus().toString()
+                    isAllStatusSame = reportsUpdated.get(i).getStatus().toString()
                             .equalsIgnoreCase(reportsUpdated.get(k).getStatus().toString());
                 }
 
                 // Type
                 if (reportsUpdated.get(i).getType() != null && reportsUpdated.get(k).getType() != null) {
-                    isAllType = reportsUpdated.get(i).getType().toString()
+                    isAllTypeSame = reportsUpdated.get(i).getType().toString()
                             .equalsIgnoreCase(reportsUpdated.get(k).getType().toString());
                 }
             }
         }
 
-        // Check if field Priorty  has all elements are same, set value to the field,
+        // Check if field Priority  has all elements are same, set value to the field,
         // same with 2 others fields
-        if (isAllPriorityDiff) {
+        boolean isDiffFieldsValue = false;
+        if (isAllPrioritySame) {
             selectPriority.setValue(firstReport.getPriority());
         } else {
             selectPriority.setValue(null);
+            isDiffFieldsValue =  true;
         }
 
-        if (isAllStatusDiff) {
+        if (isAllStatusSame) {
             status.setValue(firstReport.getStatus());
         } else {
             status.setValue(null);
+            isDiffFieldsValue =  true;
         }
 
-        if (isAllType) {
+        if (isAllTypeSame) {
             selectType.setValue(firstReport.getType());
         } else {
             selectType.setValue(null);
+            isDiffFieldsValue =  true;
         }
 
         // set value to version field
         versionSelected.setValue(firstReport.getVersion());
+
+        // check buttons Revert and Update should be hidden or not
+        if (isDiffFieldsValue) {
+            btnUpdate.setVisible(false);
+            btnRevert.setVisible(false);
+        }
+        else {
+            btnUpdate.setVisible(true);
+            btnRevert.setVisible(true);
+
+            // handle Revert button (function) for multi rows
+            this.clickRevertBtnForMultiRows(firstReport);
+        }
+
 
         // check authors and descriptions are same of all reports
         boolean isSameAuthor = false, isSameDescription = false;
@@ -626,7 +655,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         this.bindingDataForFileds(binderReport);
 
         // trigger Revert Button
-      //  this.clickRevertBtnForOneRow(oldReport);
+        this.clickRevertBtnForOneRow(oldReport);
 
 
 //        // trigger Update Button
