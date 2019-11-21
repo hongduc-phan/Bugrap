@@ -1,6 +1,7 @@
 package org.vaadin.harry.spring;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.notification.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,6 +16,7 @@ import java.util.Set;
 
 @Route
 @PWA(name = "Project Base for Vaadin Flow with Spring", shortName = "Project Base")
+@CssImport("./styles/shared-styles.css")
 public class MainView extends VerticalLayout {
 
     public MainView(@Autowired MessageBean bean) {

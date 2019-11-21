@@ -1,6 +1,7 @@
-.clicked-active{
-    background-color: grey;
+:host(.clicked-active) {
+    background-color: red !important;
 }
+
 .primary {
     background-color: darkgray;
 }

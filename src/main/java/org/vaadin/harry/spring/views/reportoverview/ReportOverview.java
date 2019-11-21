@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  */
 @Tag("report-overview")
 @JsModule("./src/views/report-overview/report-overview.js")
-@CssImport(value = "./styles/views/report-overview/report-overview.css")
+@CssImport(value = "./styles/views/report-overview/report-overview.css", themeFor = "vaadin-button")
 public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOverviewModel> implements AfterNavigationObserver {
 
     // connect to Bugrap domain service
@@ -227,6 +227,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         footerContent.add(reportDetails);
         footerReport.add(footerContent);
         wrapperInfo.add(footerReport);
+        btnOnlyMe.setThemeName("primary");
     }
 
     private void showStatusDistributionBar(int first, int second, int third) {
