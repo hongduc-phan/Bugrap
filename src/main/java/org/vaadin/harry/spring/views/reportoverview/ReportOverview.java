@@ -57,56 +57,56 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private static BugrapRepository bugrapRepository = new BugrapRepository("/tmp/bugrapdb111;create=true");
 
     @Id("vaadinComboBox")
-    private  ComboBox<Project> projectsComboBox;
+    private ComboBox<Project> projectsComboBox;
     @Id("vaadinButtonLogout")
-    private  Button vaadinButtonLogout;
+    private Button vaadinButtonLogout;
     @Id("vaadinButtonAccount")
-    private  Button vaadinButtonAccount;
+    private Button vaadinButtonAccount;
     TextField searchBar = new TextField();
     @Id("select-project")
-    private  Select selectVersion;
+    private Select selectVersion;
 
     @Id("btn-onlyme")
-    private  Button btnOnlyMe;
+    private Button btnOnlyMe;
     @Id("btn-everyone")
-    private  Button btnEveryOne;
+    private Button btnEveryOne;
     @Id("btn-open")
-    private  Button btnOpen;
+    private Button btnOpen;
     @Id("btn-allkinds")
-    private  Button btnAllkinds;
+    private Button btnAllkinds;
     @Id("btn-custom")
-    private  Button btnCustoms;
+    private Button btnCustoms;
     @Id("wrapper-overview")
-    private  Element wrapperOverview;
+    private Element wrapperOverview;
     @Id("wrapper-table")
-    private  Element wrapperTable;
+    private Element wrapperTable;
 
     private boolean isClicked_onlyMe = false;
     private boolean isClicked_Everyone = false;
     private boolean isClicked_report = false;
     @Id("table")
-    private  Grid<Report> reportTable;
+    private Grid<Report> reportTable;
     @Id("wrapper-info")
     private HorizontalLayout wrapperInfo;
-    private  VerticalLayout footerReport = new VerticalLayout();
-    private  HorizontalLayout footerTitle = new HorizontalLayout();
+    private VerticalLayout footerReport = new VerticalLayout();
+    private HorizontalLayout footerTitle = new HorizontalLayout();
 
-    private  Select<Report.Priority> selectPriority = new Select<>();
-    private  Select<Report.Status> status = new Select<>();
-    private  Select<ProjectVersion> versionSelected = new Select<>();
-    private  Select<Report.Type> selectType = new Select<>();
+    private Select<Report.Priority> selectPriority = new Select<>();
+    private Select<Report.Status> status = new Select<>();
+    private Select<ProjectVersion> versionSelected = new Select<>();
+    private Select<Report.Type> selectType = new Select<>();
 
-    private  HorizontalLayout footerContent = new HorizontalLayout();
-    private  Text author = new Text("");
-    private  Paragraph reportDetails = new Paragraph();
-    private  Button btnUpdate = new Button("Update");
-    private  Button btnRevert = new Button("Revert");
+    private HorizontalLayout footerContent = new HorizontalLayout();
+    private Text author = new Text("");
+    private Paragraph reportDetails = new Paragraph();
+    private Button btnUpdate = new Button("Update");
+    private Button btnRevert = new Button("Revert");
     ConfirmDialog dialogUpdateSucceed = new ConfirmDialog("Update Report",
             "The report is updated!", "OK", this::onOKUpdate);
-    private  AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new ProjectVersion());
-    private  AtomicReference<String> projectSelected = new AtomicReference(new ArrayList<>());
-    private  ArrayList<String> listVersions = new ArrayList<>();
-    private  List<Report> reportListFilterByProjectAndVersion = new ArrayList<Report>();
+    private AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new ProjectVersion());
+    private AtomicReference<String> projectSelected = new AtomicReference(new ArrayList<>());
+    private ArrayList<String> listVersions = new ArrayList<>();
+    private List<Report> reportListFilterByProjectAndVersion = new ArrayList<Report>();
     @Id("wrapper-distribution-bar")
     private HorizontalLayout wraperDistributionBar;
     @Id("wrapper-search-bar")
@@ -121,7 +121,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         searchBar.setPrefixComponent(icon);
         searchBar.setClearButtonVisible(true);
         searchBar.setPlaceholder("Searching...");
-        searchBar.getStyle().set("width","80%");
+        searchBar.getStyle().set("width", "80%");
         searchBar.getStyle().set("margin-right", "16px");
         wrapperSearchBar.add(searchBar);
         this.setVisibleOverviewReport();
@@ -153,7 +153,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         searchBar.addValueChangeListener(e -> {
             System.out.println(e.getValue());
             if (reportListFilterByProjectAndVersion.size() > 0) {
-                List<Report> filterReportList = reportListFilterByProjectAndVersion.stream().filter(r ->  (r.getVersion() != null && r.getVersion().getVersion().equalsIgnoreCase(e.getValue()))
+                List<Report> filterReportList = reportListFilterByProjectAndVersion.stream().filter(r -> (r.getVersion() != null && r.getVersion().getVersion().equalsIgnoreCase(e.getValue()))
                         || (r.getPriority() != null && r.getPriority().toString().equalsIgnoreCase(e.getValue()))
                         || (r.getType() != null && r.getType().toString().equalsIgnoreCase(e.getValue()))
                         || (r.getSummary() != null && r.getSummary().contains(e.getValue()))
@@ -184,7 +184,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
 //        // UIs
 //        vaadinProgressBar.setValue(0.15);
-        this.showStatusDistributionBar(0,0,0);
+        this.showStatusDistributionBar(0, 0, 0);
 
         // filter report by clicking Only Me
         this.filterReportByBtnOnlyMe();
@@ -233,20 +233,17 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             wraperDistributionBar.removeAll();
             ProgressBar progressBar = new ProgressBar(200, 1000, first, second, third);
             wraperDistributionBar.add(progressBar);
-        }
-        else {
+        } else {
             AtomicInteger closed = new AtomicInteger();
             AtomicInteger nonResolved = new AtomicInteger();
             AtomicInteger unassigned = new AtomicInteger();
-            reportListFilterByProjectAndVersion.stream().forEach( r -> {
+            reportListFilterByProjectAndVersion.stream().forEach(r -> {
                 if (r.getStatus() == null) {
                     unassigned.addAndGet(1);
-                }
-                else if (r.getStatus().toString().toLowerCase().equals("won't fix") ||
+                } else if (r.getStatus().toString().toLowerCase().equals("won't fix") ||
                         r.getStatus().toString().toLowerCase().equals("duplicate")) {
                     nonResolved.addAndGet(1);
-                }
-                else {
+                } else {
                     closed.addAndGet(1);
                 }
             });
@@ -325,7 +322,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         if (reportListFilterByProjectAndVersion.size() > 0) {
             List<Report> reportOnlyMe = reportListFilterByProjectAndVersion
                     .stream()
-                    .filter(report -> report != null && report.getAssigned() != null && report.getAssigned().getName().toString().toLowerCase().equals("developer"))
+                    .filter(report -> report != null && report.getAssigned() != null && report.getAssigned().getName().toLowerCase().equals("developer"))
                     .collect(Collectors.toList());
             reportTable.setItems(reportOnlyMe);
             this.setVisibleOverviewReport();
@@ -377,7 +374,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         projectsComboBox.addValueChangeListener(
                 e -> {
                     projectSelected.set(e.getValue().toString());
-                    Optional<Project> project = allProjects.stream().filter(p ->  p.getName().toString().equalsIgnoreCase(e.getValue().toString()))
+                    Optional<Project> project = allProjects.stream().filter(p -> p.getName().equalsIgnoreCase(e.getValue().toString()))
                             .findFirst();
                     project.ifPresent(pro -> {
                         this.projectVersions.set(bugrapRepository.findProjectVersions(pro));
@@ -389,13 +386,13 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                         selectVersion.setValue((listVersions.get(0)));
                         this.setVisibleOverviewReport();
 
-                        this.filterReportByProjectAndVersion(projectSelected.get().toString(), listVersions.get(0));
+                        this.filterReportByProjectAndVersion(projectSelected.get(), listVersions.get(0));
                     });
-                    this.showStatusDistributionBar(0,0,0);
+                    this.showStatusDistributionBar(0, 0, 0);
                 });
     }
 
-    private void filterReportByProjectAndVersion (String projectSelected, String version) {
+    private void filterReportByProjectAndVersion(String projectSelected, String version) {
         String projectVersionSelected = version;
         Set<org.vaadin.bugrap.domain.entities.Report> reports
                 = this.listReports(null, null, bugrapRepository);
@@ -411,7 +408,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                     .stream()
                     .filter(rl ->
                             rl.getVersion() != null)
-                    .filter(listReport -> listReport.getVersion().getVersion().toString().equalsIgnoreCase(version) )
+                    .filter(listReport -> listReport.getVersion().getVersion().equalsIgnoreCase(version))
                     .collect(Collectors.toList());
             reportTable.getDataProvider().refreshAll();
             reportTable.setItems(reportListFilterByProjectAndVersion);
@@ -448,7 +445,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                 reportTable.setItems(reportListFilterByProjectAndVersion);
                 this.setVisibleOverviewReport();
             }
-            this.showStatusDistributionBar(0,0,0);
+            this.showStatusDistributionBar(0, 0, 0);
         });
     }
 
@@ -469,29 +466,30 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     }
 
     private Report reportUpdated = new Report();
+    private List<Report> reportsUpdated = new ArrayList<Report>();
 
     // Method binding data to 4 fields Priority, Status, Type and Version
-    private void bindingDataForFileds (Binder<Report> binderReport) {
-        selectPriority.addValueChangeListener( e -> {
+    private void bindingDataForFileds(Binder<Report> binderReport) {
+        selectPriority.addValueChangeListener(e -> {
             binderReport.forField(selectPriority)
                     .bind(Report::getPriority, Report::setPriority);
         });
-        selectType.addValueChangeListener( e -> {
+        selectType.addValueChangeListener(e -> {
             binderReport.forField(selectType)
                     .bind(Report::getType, Report::setType);
         });
-        status.addValueChangeListener( e -> {
+        status.addValueChangeListener(e -> {
             binderReport.forField(status)
                     .bind(Report::getStatus, Report::setStatus);
         });
-        versionSelected.addValueChangeListener( e -> {
+        versionSelected.addValueChangeListener(e -> {
             binderReport.forField(versionSelected)
                     .bind(Report::getVersion, Report::setVersion);
         });
 
     }
 
-    private void clickRevertBtn (Report oldReport) {
+    private void clickRevertBtnForOneRow(Report oldReport) {
         btnRevert.addClickListener(e -> {
             selectPriority.setValue(oldReport.getPriority());
             selectType.setValue(oldReport.getType());
@@ -500,7 +498,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         });
     }
 
-    private void clickUpdateBtn (Binder<Report> binderReport, String currentVersion) {
+    private void clickUpdateBtnForOneRow(Binder<Report> binderReport, String currentVersion) {
         btnUpdate.addClickListener(e -> {
             try {
                 binderReport.writeBean(reportUpdated);
@@ -514,12 +512,12 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         });
     }
 
-    private  void implementSelectOneRow (Set<Report> getReport) {
+    private void implementSelectOneRow(Set<Report> getReport) {
         reportUpdated = getReport.iterator().next();
-        Report oldReport =  reportUpdated;
+        Report oldReport = reportUpdated;
         String currentVersion = reportUpdated.getVersion().getVersion();
 
-        versionSelected.setItems( this.projectVersions.get());
+        versionSelected.setItems(this.projectVersions.get());
 
         selectPriority.setValue(reportUpdated.getPriority());
         selectType.setValue(reportUpdated.getType());
@@ -527,19 +525,128 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         versionSelected.setValue(reportUpdated.getVersion());
 
         //render report detail in overview report in footer with author and description of the selected report
-        author.setText( reportUpdated.getAuthor() != null ? reportUpdated.getAuthor().getName().toString() : "Unknown");
-        reportDetails.setText(reportUpdated.getDescription() != null ? reportUpdated.getDescription().toString() : "No description");
+        author.setText(reportUpdated.getAuthor() != null ? reportUpdated.getAuthor().getName() : "Unknown");
+        reportDetails.setText(reportUpdated.getDescription() != null ? reportUpdated.getDescription() : "No description");
 
         //binding data to 4 fields Priority, Status, Type and Version
         Binder<Report> binderReport = new Binder<Report>();
         this.bindingDataForFileds(binderReport);
 
         // trigger Revert Button
-        this.clickRevertBtn(oldReport);
+        this.clickRevertBtnForOneRow(oldReport);
 
         // trigger Update Button
-        this.clickUpdateBtn (binderReport, currentVersion);
+        this.clickUpdateBtnForOneRow(binderReport, currentVersion);
     }
+
+    private void implementSelectMultiRows(Set<Report> getReport) {
+        reportsUpdated = (List<Report>) getReport.stream().collect(Collectors.toList());
+        Report firstReport = reportsUpdated.stream().findFirst().get();
+        Report oldReport = firstReport;
+        String currentVersion = firstReport.getVersion().getVersion();
+
+        versionSelected.setItems(this.projectVersions.get());
+        boolean isAllPriorityDiff = true, isAllStatusDiff = true, isAllType = true;
+
+        for (int i = 0; i < reportsUpdated.size() - 1; i++) {
+            for (int k = i + 1; k < reportsUpdated.size(); k++) {
+
+                // Check Priority, Status and Type whether diff or not
+                //Priority
+                if (reportsUpdated.get(i).getPriority() != null && reportsUpdated.get(k).getPriority() != null) {
+                    isAllPriorityDiff = reportsUpdated.get(i).getPriority().toString()
+                            .equalsIgnoreCase(reportsUpdated.get(k).getPriority().toString());
+                }
+
+                // Status
+                if (reportsUpdated.get(i).getStatus() != null && reportsUpdated.get(k).getStatus() != null) {
+                    isAllStatusDiff = reportsUpdated.get(i).getStatus().toString()
+                            .equalsIgnoreCase(reportsUpdated.get(k).getStatus().toString());
+                }
+
+                // Type
+                if (reportsUpdated.get(i).getType() != null && reportsUpdated.get(k).getType() != null) {
+                    isAllType = reportsUpdated.get(i).getType().toString()
+                            .equalsIgnoreCase(reportsUpdated.get(k).getType().toString());
+                }
+            }
+        }
+
+        // Check if field Priorty  has all elements are same, set value to the field,
+        // same with 2 others fields
+        if (isAllPriorityDiff) {
+            selectPriority.setValue(firstReport.getPriority());
+        } else {
+            selectPriority.setValue(null);
+        }
+
+        if (isAllStatusDiff) {
+            status.setValue(firstReport.getStatus());
+        } else {
+            status.setValue(null);
+        }
+
+        if (isAllType) {
+            selectType.setValue(firstReport.getType());
+        } else {
+            selectType.setValue(null);
+        }
+
+        // set value to version field
+        versionSelected.setValue(firstReport.getVersion());
+
+        // check authors and descriptions are same of all reports
+        boolean isSameAuthor = false, isSameDescription = false;
+        for (int i = 0; i < reportsUpdated.size() - 1; i++) {
+            for (int k = i + 1; k < reportsUpdated.size(); k++) {
+
+                // Author
+                if (reportsUpdated.get(i).getAuthor() != null && reportsUpdated.get(k).getAuthor() != null) {
+                    isSameAuthor = reportsUpdated.get(i).getAuthor().toString()
+                            .equalsIgnoreCase(reportsUpdated.get(k).getAuthor().toString());
+                }
+
+                // Description
+                if (reportsUpdated.get(i).getDescription() != null && reportsUpdated.get(k).getDescription() != null) {
+                    isSameDescription = reportsUpdated.get(i).getDescription().toString()
+                            .equalsIgnoreCase(reportsUpdated.get(k).getDescription().toString());
+                }
+
+                //render report detail in overview report in footer with author and description of the selected report
+                author.setText( firstReport.getAuthor() != null && isSameAuthor
+                        ? firstReport.getAuthor().getName().toString() : "Unknown");
+                reportDetails.setText(firstReport.getDescription() != null && isSameDescription
+                        ? firstReport.getDescription().toString() : "No description");
+            }
+        }
+
+//
+        //binding data to 4 fields Priority, Status, Type and Version
+        Binder<Report> binderReport = new Binder<Report>();
+        this.bindingDataForFileds(binderReport);
+
+        // trigger Revert Button
+      //  this.clickRevertBtnForOneRow(oldReport);
+
+
+//        // trigger Update Button
+//        for (Report report : reportsUpdated) {
+//            btnUpdate.addClickListener(e -> {
+//                try {
+//                    binderReport.writeBean(report);
+//                    report = bugrapRepository.save(report);
+//                    this.filterReportByProjectAndVersion(report.getProject().toString(), currentVersion);
+//                    dialogUpdateSucceed.open();
+//
+//                } catch (ValidationException ex) {
+//                    ex.printStackTrace();
+//                }
+//            });
+//        }
+
+
+    }
+
 
     private void clickRow(AbstractField.ComponentValueChangeEvent<Grid<Report>, Set<Report>> gridSetComponentValueChangeEvent) {
         this.setVisibleOverviewReport();
@@ -549,6 +656,8 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         // if selected 1 row
         if (gridSetComponentValueChangeEvent.getValue().size() == 1) {
             this.implementSelectOneRow(getReport);
+        } else if (gridSetComponentValueChangeEvent.getValue().size() > 1) {
+            this.implementSelectMultiRows(getReport);
         }
     }
 
