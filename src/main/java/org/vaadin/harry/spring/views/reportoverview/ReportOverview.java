@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
  */
 @Tag("report-overview")
 @JsModule("./src/views/report-overview/report-overview.js")
-@CssImport(value = "./styles/views/report-overview/report-overview.css")
+@CssImport(value = "./styles/views/report-overview/report-overview.css", themeFor = "vaadin-button")
 public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOverviewModel> implements AfterNavigationObserver {
 
     // connect to Bugrap domain service
@@ -285,13 +285,12 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         if (reportListFilterByProjectAndVersion.size() > 0) {
             reportTable.setItems(reportListFilterByProjectAndVersion);
             this.setVisibleOverviewReport();
-        }
-
-        if (isClicked_Everyone) {
-            btnOpen.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            btnAllkinds.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            btnEveryOne.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            btnOnlyMe.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            if (isClicked_Everyone) {
+                btnOpen.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                btnAllkinds.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                btnEveryOne.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                btnOnlyMe.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            }
         }
     }
 
@@ -330,12 +329,12 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                     .collect(Collectors.toList());
             reportTable.setItems(reportOnlyMe);
             this.setVisibleOverviewReport();
-        }
-        if (isClicked_onlyMe) {
-            btnOpen.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            btnAllkinds.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            btnOnlyMe.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            btnEveryOne.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            if (isClicked_onlyMe) {
+                btnOpen.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                btnAllkinds.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                btnOnlyMe.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                btnEveryOne.removeThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            }
         }
     }
 
