@@ -84,6 +84,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private boolean isClicked_onlyMe = false;
     private boolean isClicked_Everyone = false;
     private boolean isClicked_report = false;
+    private Report reportUpdated = new Report();
+    private List<Report> reportsUpdated = new ArrayList<Report>();
+    Binder<Report> binderReport = new Binder<Report>();
+
     @Id("table")
     private Grid<Report> reportTable;
     @Id("wrapper-info")
@@ -465,9 +469,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         }
     }
 
-    private Report reportUpdated = new Report();
-    private List<Report> reportsUpdated = new ArrayList<Report>();
-
     // Method binding data to 4 fields Priority, Status, Type and Version
     private void bindingDataForFileds(Binder<Report> binderReport) {
         selectPriority.addValueChangeListener(e -> {
@@ -491,12 +492,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
     // Revert button (function) for clicking one row
     private void clickRevertBtnForOneRow(Report oldReport) {
-        btnRevert.addClickListener(e -> {
-            selectPriority.setValue(oldReport.getPriority());
-            selectType.setValue(oldReport.getType());
-            status.setValue(oldReport.getStatus());
-            versionSelected.setValue(oldReport.getVersion());
-        });
+        selectPriority.setValue(oldReport.getPriority());
+        selectType.setValue(oldReport.getType());
+        status.setValue(oldReport.getStatus());
+        versionSelected.setValue(oldReport.getVersion());
     }
 
     // Revert button (function) for clicking one row
@@ -506,20 +505,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             selectType.setValue(report.getType());
             this.status.setValue(report.getStatus());
             versionSelected.setValue(report.getVersion());
-        });
-    }
-
-    private void clickUpdateBtnForOneRow(Binder<Report> binderReport, String currentVersion) {
-        btnUpdate.addClickListener(e -> {
-            try {
-                binderReport.writeBean(reportUpdated);
-                reportUpdated = bugrapRepository.save(reportUpdated);
-                this.filterReportByProjectAndVersion(reportUpdated.getProject().toString(), currentVersion);
-                dialogUpdateSucceed.open();
-
-            } catch (ValidationException ex) {
-                ex.printStackTrace();
-            }
         });
     }
 
@@ -540,7 +525,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         reportDetails.setText(reportUpdated.getDescription() != null ? reportUpdated.getDescription() : "No description");
 
         //binding data to 4 fields Priority, Status, Type and Version
-        Binder<Report> binderReport = new Binder<Report>();
         this.bindingDataForFileds(binderReport);
 
         // trigger Revert Button
@@ -548,6 +532,19 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         // trigger Update Button
         this.clickUpdateBtnForOneRow(binderReport, currentVersion);
+    }
+
+    private void clickUpdateBtnForOneRow(Binder<Report> binderReport, String currentVersion) {
+        btnUpdate.addClickListener(e -> {
+            try {
+                binderReport.writeBean(this.reportUpdated);
+                reportUpdated = bugrapRepository.save(reportUpdated);
+                this.filterReportByProjectAndVersion(reportUpdated.getProject().toString(), currentVersion);
+                dialogUpdateSucceed.open();
+            } catch (ValidationException ex) {
+                ex.printStackTrace();
+            }
+        });
     }
 
     private void implementSelectMultiRows(Set<Report> getReport) {
@@ -558,6 +555,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         versionSelected.setItems(this.projectVersions.get());
         boolean isAllPrioritySame = true, isAllStatusSame = true, isAllTypeSame = true;
+        boolean isDiffFieldsValue = false;
 
         for (int i = 0; i < reportsUpdated.size() - 1; i++) {
             for (int k = i + 1; k < reportsUpdated.size(); k++) {
@@ -585,44 +583,11 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         // Check if field Priority  has all elements are same, set value to the field,
         // same with 2 others fields
-        boolean isDiffFieldsValue = false;
-        if (isAllPrioritySame) {
-            selectPriority.setValue(firstReport.getPriority());
-        } else {
-            selectPriority.setValue(null);
-            isDiffFieldsValue =  true;
-        }
-
-        if (isAllStatusSame) {
-            status.setValue(firstReport.getStatus());
-        } else {
-            status.setValue(null);
-            isDiffFieldsValue =  true;
-        }
-
-        if (isAllTypeSame) {
-            selectType.setValue(firstReport.getType());
-        } else {
-            selectType.setValue(null);
-            isDiffFieldsValue =  true;
-        }
-
+        this.checkFieldsSameValue(isAllPrioritySame, isAllStatusSame, isAllTypeSame, isDiffFieldsValue,  firstReport);
         // set value to version field
         versionSelected.setValue(firstReport.getVersion());
 
-        // check buttons Revert and Update should be hidden or not
-        if (isDiffFieldsValue) {
-            btnUpdate.setVisible(false);
-            btnRevert.setVisible(false);
-        }
-        else {
-            btnUpdate.setVisible(true);
-            btnRevert.setVisible(true);
-
-            // handle Revert button (function) for multi rows
-            this.clickRevertBtnForMultiRows(firstReport);
-        }
-
+        this.clickRevertBtnForMultiRows(firstReport);
 
         // check authors and descriptions are same of all reports
         boolean isSameAuthor = false, isSameDescription = false;
@@ -649,31 +614,68 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             }
         }
 
-//
         //binding data to 4 fields Priority, Status, Type and Version
-        Binder<Report> binderReport = new Binder<Report>();
-        this.bindingDataForFileds(binderReport);
+        this.bindingDataForFileds(this.binderReport);
 
-        // trigger Revert Button
-        this.clickRevertBtnForOneRow(oldReport);
+        // check buttons Revert and Update should be hidden or not
+        if (isDiffFieldsValue) {
+            btnUpdate.setVisible(false);
+            btnRevert.setVisible(false);
+        }
+        else {
+            btnUpdate.setVisible(true);
+            btnRevert.setVisible(true);
 
+            // handle Revert button (function) for multi rows
+            this.clickRevertBtnForMultiRows(firstReport);
+        }
+        // Trigger Update Button for Multi-rows
+        btnUpdate.addClickListener(this::handleUpdateMultiRows);
+    }
 
-//        // trigger Update Button
-//        for (Report report : reportsUpdated) {
-//            btnUpdate.addClickListener(e -> {
-//                try {
-//                    binderReport.writeBean(report);
-//                    report = bugrapRepository.save(report);
-//                    this.filterReportByProjectAndVersion(report.getProject().toString(), currentVersion);
-//                    dialogUpdateSucceed.open();
-//
-//                } catch (ValidationException ex) {
-//                    ex.printStackTrace();
-//                }
-//            });
-//        }
+    // check 3 fields are same value or not
+    private void checkFieldsSameValue (boolean isAllPrioritySame, boolean isAllStatusSame,
+                                    boolean isAllTypeSame,
+                                    boolean isDiffFieldsValue,
+                                    Report firstReport) {
+        if (isAllPrioritySame) {
+            selectPriority.setValue(firstReport.getPriority());
+        } else {
+            selectPriority.setValue(null);
+            isDiffFieldsValue =  true;
+        }
 
+        if (isAllStatusSame) {
+            status.setValue(firstReport.getStatus());
+        } else {
+            status.setValue(null);
+            isDiffFieldsValue =  true;
+        }
 
+        if (isAllTypeSame) {
+            selectType.setValue(firstReport.getType());
+        } else {
+            selectType.setValue(null);
+            isDiffFieldsValue =  true;
+        }
+    }
+    private void handleUpdateMultiRows(ClickEvent<Button> buttonClickEvent) {
+
+        try {
+            if (this.reportsUpdated.size() > 1){
+                for (Report report : reportsUpdated) {
+                    this.reportUpdated = report;
+                    this.binderReport.writeBean(this.reportUpdated);
+                    this.reportUpdated = this.bugrapRepository.save(report);
+                    String currentVersion = this.reportUpdated.getVersion().getVersion();
+                    this.filterReportByProjectAndVersion(this.reportUpdated.getProject().toString(), currentVersion);
+                    dialogUpdateSucceed.open();
+                }
+            }
+
+        } catch (ValidationException ex) {
+            ex.printStackTrace();
+        }
     }
 
 
