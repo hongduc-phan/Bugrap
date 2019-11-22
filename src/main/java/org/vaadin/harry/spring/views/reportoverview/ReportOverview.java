@@ -349,7 +349,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         if (project != null) {
             this.projectVersions.set(bugrapRepository.findProjectVersions(project));
-
+            listVersions.clear();
             this.projectVersions.get().forEach(version -> {
                 listVersions.add(version.getVersion());
             });
@@ -514,6 +514,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         Report oldReport = reportUpdated;
         String currentVersion = reportUpdated.getVersion().getVersion();
 
+        versionSelected.removeAll();
         versionSelected.setItems(this.projectVersions.get());
 
         selectPriority.setValue(reportUpdated.getPriority());
@@ -640,6 +641,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         Report oldReport = firstReport;
         String currentVersion = firstReport.getVersion().getVersion();
 
+        versionSelected.removeAll();
         versionSelected.setItems(this.projectVersions.get());
         boolean isAllPrioritySame = true, isAllStatusSame = true, isAllTypeSame = true;
 
