@@ -28,20 +28,19 @@ import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.templatemodel.TemplateModel;
 import components.ProgressBar;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.bugrap.domain.BugrapRepository;
 import org.vaadin.bugrap.domain.entities.Project;
 import org.vaadin.bugrap.domain.entities.ProjectVersion;
 import org.vaadin.bugrap.domain.entities.Report;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 /**
  * A Designer generated component for the report-overview template.
@@ -341,15 +340,13 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         return bugrapRepository.findProjects();
     }
 
-    private void setValueForProjectAndVersionWithoutClickEvents(AtomicReference<Set<ProjectVersion>> projectVersions,
-                                                                Set<Project> allProjects,
-                                                                ArrayList<String> listVersions) {
-
-        Optional<Project> project = allProjects.stream().filter(p -> {
+    private void setValueToVersionProject (Set<Project> allProjects) {
+        Project project = allProjects.stream().filter(p -> {
             return p.getName().toLowerCase().equals(projectsComboBox.getValue().toString().toLowerCase());
-        }).findFirst();
-        project.ifPresent(pro -> {
-            this.projectVersions.set(bugrapRepository.findProjectVersions(pro));
+        }).findFirst().get();
+
+        if (project != null) {
+            this.projectVersions.set(bugrapRepository.findProjectVersions(project));
 
             this.projectVersions.get().forEach(version -> {
                 listVersions.add(version.getVersion());
@@ -357,7 +354,14 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
             selectVersion.setItems(listVersions);
             selectVersion.setValue(listVersions.get(0));
-        });
+        }
+    }
+
+    private void setValueForProjectAndVersionWithoutClickEvents(AtomicReference<Set<ProjectVersion>> projectVersions,
+                                                                Set<Project> allProjects,
+                                                                ArrayList<String> listVersions) {
+
+        this.setValueToVersionProject(allProjects);
         String selectVersionValue = String.valueOf(selectVersion.getValue());
         this.filterReportByProjectAndVersion(projectsComboBox.getValue().toString(), selectVersionValue);
         this.setVisibleOverviewReport();
@@ -367,34 +371,34 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                                        ArrayList<String> listVersions) {
         projectsComboBox.addValueChangeListener(
                 e -> {
-                    Optional<Project> project = allProjects.stream().filter(p -> p.getName().equalsIgnoreCase(e.getValue().toString()))
-                            .findFirst();
-                    project.ifPresent(pro -> {
-                        this.projectVersions.set(bugrapRepository.findProjectVersions(pro));
-
-                        this.projectVersions.get().stream().forEach(version -> {
-                            listVersions.add(version.getVersion());
-                        });
-
-                        selectVersion.setValue((listVersions.get(0)));
-                        this.setVisibleOverviewReport();
-
-                        this.filterReportByProjectAndVersion(e.getValue().toString(), listVersions.get(0));
-                    });
+                    this.setValueToVersionProject(allProjects);
+                    this.filterReportByProjectAndVersion(e.getValue().toString(), listVersions.get(0));
                     this.showStatusDistributionBar(0, 0, 0);
                 });
     }
 
-    private void filterReportByProjectAndVersion(String projectSelected, String version) {
-        String projectVersionSelected = version;
+    private  List<org.vaadin.bugrap.domain.entities.Report>  checkReportListFilterByProject (String projectSelected,
+                                                 String version) {
         Set<org.vaadin.bugrap.domain.entities.Report> reports
                 = this.listReports(null, null, bugrapRepository);
 
-        List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject = reports.stream()
+        return  reports.stream()
                 .filter(rl -> rl.getProject() != null)
                 .filter(r -> projectSelected.equalsIgnoreCase(r.getProject().getName()))
                 .collect(Collectors.toList());
+    }
 
+    private void setValueForReportTable () {
+        reportTable.getDataProvider().refreshAll();
+        reportTable.setItems(reportListFilterByProjectAndVersion);
+        this.setVisibleOverviewReport();
+    }
+    private void filterReportByProjectAndVersion(String projectSelected, String version) {
+//        Set<org.vaadin.bugrap.domain.entities.Report> reports
+//                = this.listReports(null, null, bugrapRepository);
+//
+        List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject =
+                this.checkReportListFilterByProject(projectSelected, version);
 //            // version
         if (!reportListFilterByProject.isEmpty()) {
             reportListFilterByProjectAndVersion = reportListFilterByProject
@@ -403,29 +407,18 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                             rl.getVersion() != null)
                     .filter(listReport -> listReport.getVersion().getVersion().equalsIgnoreCase(version))
                     .collect(Collectors.toList());
-            reportTable.getDataProvider().refreshAll();
-            reportTable.setItems(reportListFilterByProjectAndVersion);
-            this.setVisibleOverviewReport();
+            this.setValueForReportTable();
         }
     }
 
     private void filterReportByVersionWhenClickSelectReportList() {
         selectVersion.addValueChangeListener(version -> {
             String projectSelected = projectsComboBox.getValue().toString();
-
             String projectVersionSelected = String.valueOf(version.getValue());
-            // projectVersions.get().stream().filter(v -> v.getVersion().equals(version.getValue())).findFirst();
-            Set<org.vaadin.bugrap.domain.entities.Report> reports
-                    = this.listReports(null, null, bugrapRepository);
+            this.checkReportListFilterByProject(projectSelected, version.toString());
 
-            // filter report by project and project version
-            // project
-            List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject = reports.stream()
-                    .filter(rl ->
-                            rl.getProject() != null)
-                    .filter(r -> projectSelected.equalsIgnoreCase(r.getProject().getName()))
-                    .collect(Collectors.toList());
-
+            List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject =
+                    this.checkReportListFilterByProject(projectSelected, version.toString());
 //            // version
             if (!reportListFilterByProject.isEmpty()) {
                 reportListFilterByProjectAndVersion = reportListFilterByProject
@@ -434,9 +427,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                                 && !StringUtils.isEmpty(rl.getVersion().getVersion())
                                 && rl.getVersion().getVersion().toLowerCase().equals(projectVersionSelected.toLowerCase()))
                         .collect(Collectors.toList());
-                reportTable.getDataProvider().refreshAll();
-                reportTable.setItems(reportListFilterByProjectAndVersion);
-                this.setVisibleOverviewReport();
+                this.setValueForReportTable();
             }
             this.showStatusDistributionBar(0, 0, 0);
         });
@@ -543,15 +534,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         this.clickUpdateBtnForOneRow(binderReport, currentVersion);
     }
 
-    private void implementSelectMultiRows(Set<Report> getReport) {
-        reportsUpdated = (List<Report>) getReport.stream().collect(Collectors.toList());
-        Report firstReport = reportsUpdated.stream().findFirst().get();
-        Report oldReport = firstReport;
-        String currentVersion = firstReport.getVersion().getVersion();
-
-        versionSelected.setItems(this.projectVersions.get());
-        boolean isAllPrioritySame = true, isAllStatusSame = true, isAllTypeSame = true;
-
+    private void checkFieldsAreDiff (boolean isAllPrioritySame , boolean isAllStatusSame, boolean isAllTypeSame ) {
         for (int i = 0; i < reportsUpdated.size() - 1; i++) {
             for (int k = i + 1; k < reportsUpdated.size(); k++) {
 
@@ -575,10 +558,15 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                 }
             }
         }
+    }
 
-        // Check if field Priority  has all elements are same, set value to the field,
-        // same with 2 others fields
-        boolean isDiffFieldsValue = false;
+    private void checkFieldsHasSameValueAndGiveValues (
+            boolean isAllPrioritySame,
+            boolean isAllStatusSame,
+            boolean isAllTypeSame,
+            boolean isDiffFieldsValue,
+            Report firstReport) {
+
         if (isAllPrioritySame) {
             selectPriority.setValue(firstReport.getPriority());
         } else {
@@ -600,9 +588,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             isDiffFieldsValue =  true;
         }
 
-        // set value to version field
-        versionSelected.setValue(firstReport.getVersion());
-
         // check buttons Revert and Update should be hidden or not
         if (isDiffFieldsValue) {
             btnUpdate.setVisible(false);
@@ -613,10 +598,11 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             // handle Revert button (function) for multi rows
             this.clickRevertBtnForMultiRows(firstReport);
         }
+    }
 
-
-        // check authors and descriptions are same of all reports
-        boolean isSameAuthor = false, isSameDescription = false;
+    private void checkAuthorAndDescritionAreDiff (boolean isSameAuthor,
+                                                  boolean isSameDescription,
+                                                  Report firstReport) {
         for (int i = 0; i < reportsUpdated.size() - 1; i++) {
             for (int k = i + 1; k < reportsUpdated.size(); k++) {
 
@@ -639,6 +625,31 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                         ? firstReport.getDescription().toString() : "No description");
             }
         }
+    }
+
+    private void implementSelectMultiRows(Set<Report> getReport) {
+        reportsUpdated = (List<Report>) getReport.stream().collect(Collectors.toList());
+        Report firstReport = reportsUpdated.stream().findFirst().get();
+        Report oldReport = firstReport;
+        String currentVersion = firstReport.getVersion().getVersion();
+
+        versionSelected.setItems(this.projectVersions.get());
+        boolean isAllPrioritySame = true, isAllStatusSame = true, isAllTypeSame = true;
+
+        this.checkFieldsAreDiff(isAllPrioritySame, isAllStatusSame, isAllTypeSame);
+
+        // set value to version field
+        versionSelected.setValue(firstReport.getVersion());
+
+        // Check if field Priority  has all elements are same, set value to the field,
+        // same with 2 others fields
+        boolean isDiffFieldsValue = false;
+        this.checkFieldsHasSameValueAndGiveValues(isAllPrioritySame, isAllStatusSame, isAllTypeSame, isDiffFieldsValue, firstReport);
+
+
+        // check authors and descriptions are same of all reports
+        boolean isSameAuthor = false, isSameDescription = false;
+        this.checkAuthorAndDescritionAreDiff(isSameAuthor, isSameDescription, firstReport);
 
 //
         //binding data to 4 fields Priority, Status, Type and Version
@@ -648,7 +659,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         // trigger Revert Button
         this.clickRevertBtnForOneRow(oldReport);
     }
-
 
     private void clickRow(AbstractField.ComponentValueChangeEvent<Grid<Report>, Set<Report>> gridSetComponentValueChangeEvent) {
         this.setVisibleOverviewReport();
