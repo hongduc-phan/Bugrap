@@ -1,4 +1,4 @@
-package components;
+package org.vaadin.harry.spring.components;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;

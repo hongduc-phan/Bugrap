@@ -27,7 +27,8 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.templatemodel.TemplateModel;
-import components.ProgressBar;
+import org.vaadin.harry.spring.BugrapRepo;
+import org.vaadin.harry.spring.components.ProgressBar;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -52,9 +53,6 @@ import org.vaadin.bugrap.domain.entities.Report;
 @JsModule("./src/views/report-overview/report-overview.js")
 @CssImport(value = "./styles/views/report-overview/report-overview.css", themeFor = "vaadin-button")
 public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOverviewModel> implements AfterNavigationObserver {
-
-    // connect to Bugrap domain service
-    private static BugrapRepository bugrapRepository = new BugrapRepository("/tmp/bugrapdb111;create=true");
 
     @Id("vaadinComboBox")
     private ComboBox<Project> projectsComboBox;
@@ -115,7 +113,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
      * Creates a new ReportOverview.
      */
     public ReportOverview() {
-        bugrapRepository.populateWithTestData();
         Icon icon = VaadinIcon.SEARCH.create();
         searchBar.setPrefixComponent(icon);
         searchBar.setClearButtonVisible(true);
@@ -125,7 +122,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         wrapperSearchBar.add(searchBar);
         this.setVisibleOverviewReport();
         // find all projects
-        Set<Project> allProjects = this.findAllProjects();
+        Set<Project> allProjects = BugrapRepo.getRepo().findProjects();
 
         ArrayList<String> listProjects = new ArrayList<>();
         allProjects.forEach(pr -> {
@@ -335,16 +332,12 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         btnOnlyMe.addClickListener(this::showButtonClickedMessage_onlyMe);
     }
 
-    private Set<Project> findAllProjects() {
-        return bugrapRepository.findProjects();
-    }
-
     private void setValueToVersionProject (Set<Project> allProjects) {
         Project project = projectsComboBox.getValue();
 
         if (project != null) {
             this.projectVersions.clear();
-            this.projectVersions = bugrapRepository.findProjectVersions(project);
+            this.projectVersions =  BugrapRepo.getRepo().findProjectVersions(project);
             listVersions.clear();
 
             listVersions.addAll(this.projectVersions);
@@ -375,7 +368,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private  List<org.vaadin.bugrap.domain.entities.Report> getReportListFilterByProject(String projectSelected,
                                                                                          String version) {
         Set<org.vaadin.bugrap.domain.entities.Report> reports
-                = this.listReports(null, null, bugrapRepository);
+                = this.listReports(null, null, BugrapRepo.getRepo());
 
         return  reports.stream()
                 .filter(rl -> rl.getProject() != null)
@@ -488,7 +481,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         btnUpdate.addClickListener(e -> {
             try {
                 binderReport.writeBean(reportUpdated);
-                reportUpdated = bugrapRepository.save(reportUpdated);
+                reportUpdated = BugrapRepo.getRepo().save(reportUpdated);
                 this.filterReportByProjectAndVersion(reportUpdated.getProject().toString(), currentVersion);
                 dialogUpdateSucceed.open();
 
