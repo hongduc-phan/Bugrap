@@ -105,7 +105,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private Button btnRevert = new Button("Revert");
     ConfirmDialog dialogUpdateSucceed = new ConfirmDialog("Update Report",
             "The report is updated!", "OK", this::onOKUpdate);
-    private AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new HashSet<ProjectVersion>());
+    private Set<ProjectVersion> projectVersions = new HashSet<ProjectVersion>();
     private ArrayList<String> listVersions = new ArrayList<String>();
     private List<Report> reportListFilterByProjectAndVersion = new ArrayList<Report>();
     @Id("wrapper-distribution-bar")
@@ -348,9 +348,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         }).findFirst().get();
 
         if (project != null) {
-            this.projectVersions.set(bugrapRepository.findProjectVersions(project));
+            this.projectVersions.clear();
+            this.projectVersions = bugrapRepository.findProjectVersions(project);
             listVersions.clear();
-            this.projectVersions.get().forEach(version -> {
+            this.projectVersions.forEach(version -> {
                 listVersions.add(version.getVersion());
             });
 
@@ -359,7 +360,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         }
     }
 
-    private void setValueForProjectAndVersionWithoutClickEvents(AtomicReference<Set<ProjectVersion>> projectVersions,
+    private void setValueForProjectAndVersionWithoutClickEvents(Set<ProjectVersion> projectVersions,
                                                                 Set<Project> allProjects,
                                                                 ArrayList<String> listVersions) {
 
@@ -515,7 +516,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         String currentVersion = reportUpdated.getVersion().getVersion();
 
         versionSelected.removeAll();
-        versionSelected.setItems(this.projectVersions.get());
+        versionSelected.setItems(this.projectVersions);
 
         selectPriority.setValue(reportUpdated.getPriority());
         selectType.setValue(reportUpdated.getType());
@@ -642,7 +643,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         String currentVersion = firstReport.getVersion().getVersion();
 
         versionSelected.removeAll();
-        versionSelected.setItems(this.projectVersions.get());
+        versionSelected.setItems(this.projectVersions);
         boolean isAllPrioritySame = true, isAllStatusSame = true, isAllTypeSame = true;
 
         boolean []statusFieldsDiff = this.checkFieldsAreDiff(isAllPrioritySame, isAllStatusSame, isAllTypeSame);
