@@ -35,6 +35,7 @@ import org.vaadin.bugrap.domain.entities.ProjectVersion;
 import org.vaadin.bugrap.domain.entities.Report;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -103,9 +104,8 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     private Button btnRevert = new Button("Revert");
     ConfirmDialog dialogUpdateSucceed = new ConfirmDialog("Update Report",
             "The report is updated!", "OK", this::onOKUpdate);
-    private AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new ProjectVersion());
-    private AtomicReference<String> projectSelected = new AtomicReference(new ArrayList<>());
-    private ArrayList<String> listVersions = new ArrayList<>();
+    private AtomicReference<Set<ProjectVersion>> projectVersions = new AtomicReference(new HashSet<ProjectVersion>());
+    private ArrayList<String> listVersions = new ArrayList<String>();
     private List<Report> reportListFilterByProjectAndVersion = new ArrayList<Report>();
     @Id("wrapper-distribution-bar")
     private HorizontalLayout wraperDistributionBar;
@@ -174,9 +174,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         reportTable.asMultiSelect().addValueChangeListener(this::clickRow);
 
         // event Click of combo box component to select project
-        this.filterReportByProject(this.projectVersions,
-                projectSelected,
-                allProjects,
+        this.filterReportByProject(allProjects,
                 listVersions);
 
         // event Click of Select component to select project version
@@ -361,19 +359,14 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             selectVersion.setValue(listVersions.get(0));
         });
         String selectVersionValue = String.valueOf(selectVersion.getValue());
-//        projectSelected.set(listVersions.get(0));
-        projectSelected.set(projectsComboBox.getValue().toString());
-        this.filterReportByProjectAndVersion(projectSelected.get(), selectVersionValue);
+        this.filterReportByProjectAndVersion(projectsComboBox.getValue().toString(), selectVersionValue);
         this.setVisibleOverviewReport();
     }
 
-    private void filterReportByProject(AtomicReference<Set<ProjectVersion>> projectVersions,
-                                       AtomicReference<String> projectSelected,
-                                       Set<Project> allProjects,
+    private void filterReportByProject(Set<Project> allProjects,
                                        ArrayList<String> listVersions) {
         projectsComboBox.addValueChangeListener(
                 e -> {
-                    projectSelected.set(e.getValue().toString());
                     Optional<Project> project = allProjects.stream().filter(p -> p.getName().equalsIgnoreCase(e.getValue().toString()))
                             .findFirst();
                     project.ifPresent(pro -> {
@@ -386,7 +379,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                         selectVersion.setValue((listVersions.get(0)));
                         this.setVisibleOverviewReport();
 
-                        this.filterReportByProjectAndVersion(projectSelected.get(), listVersions.get(0));
+                        this.filterReportByProjectAndVersion(e.getValue().toString(), listVersions.get(0));
                     });
                     this.showStatusDistributionBar(0, 0, 0);
                 });
@@ -418,7 +411,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
     private void filterReportByVersionWhenClickSelectReportList() {
         selectVersion.addValueChangeListener(version -> {
-            projectSelected.set(projectsComboBox.getValue().toString());
+            String projectSelected = projectsComboBox.getValue().toString();
 
             String projectVersionSelected = String.valueOf(version.getValue());
             // projectVersions.get().stream().filter(v -> v.getVersion().equals(version.getValue())).findFirst();
@@ -430,7 +423,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject = reports.stream()
                     .filter(rl ->
                             rl.getProject() != null)
-                    .filter(r -> projectSelected.get().equalsIgnoreCase(r.getProject().getName()))
+                    .filter(r -> projectSelected.equalsIgnoreCase(r.getProject().getName()))
                     .collect(Collectors.toList());
 
 //            // version
@@ -613,11 +606,9 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         // check buttons Revert and Update should be hidden or not
         if (isDiffFieldsValue) {
             btnUpdate.setVisible(false);
-            btnRevert.setVisible(false);
         }
         else {
             btnUpdate.setVisible(true);
-            btnRevert.setVisible(true);
 
             // handle Revert button (function) for multi rows
             this.clickRevertBtnForMultiRows(firstReport);
@@ -656,24 +647,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         // trigger Revert Button
         this.clickRevertBtnForOneRow(oldReport);
-
-
-//        // trigger Update Button
-//        for (Report report : reportsUpdated) {
-//            btnUpdate.addClickListener(e -> {
-//                try {
-//                    binderReport.writeBean(report);
-//                    report = bugrapRepository.save(report);
-//                    this.filterReportByProjectAndVersion(report.getProject().toString(), currentVersion);
-//                    dialogUpdateSucceed.open();
-//
-//                } catch (ValidationException ex) {
-//                    ex.printStackTrace();
-//                }
-//            });
-//        }
-
-
     }
 
 
