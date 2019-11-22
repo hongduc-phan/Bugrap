@@ -29,13 +29,11 @@ import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.templatemodel.TemplateModel;
 import components.ProgressBar;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.bugrap.domain.BugrapRepository;
@@ -106,7 +104,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     ConfirmDialog dialogUpdateSucceed = new ConfirmDialog("Update Report",
             "The report is updated!", "OK", this::onOKUpdate);
     private Set<ProjectVersion> projectVersions = new HashSet<ProjectVersion>();
-    private ArrayList<String> listVersions = new ArrayList<String>();
+    private ArrayList<ProjectVersion> listVersions = new ArrayList<>();
     private List<Report> reportListFilterByProjectAndVersion = new ArrayList<Report>();
     @Id("wrapper-distribution-bar")
     private HorizontalLayout wraperDistributionBar;
@@ -130,7 +128,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         Set<Project> allProjects = this.findAllProjects();
 
         ArrayList<String> listProjects = new ArrayList<>();
-        allProjects.stream().forEach(pr -> {
+        allProjects.forEach(pr -> {
             listProjects.add(pr.getName());
         });
 
@@ -165,8 +163,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         });
 
         this.setValueForProjectAndVersionWithoutClickEvents(this.projectVersions,
-                allProjects,
-                listVersions);
+                allProjects);
 
         // set grid report table can select muiti rows
         reportTable.getSelectedItems();
@@ -343,26 +340,21 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     }
 
     private void setValueToVersionProject (Set<Project> allProjects) {
-        Project project = allProjects.stream().filter(p -> {
-            return p.getName().toLowerCase().equals(projectsComboBox.getValue().toString().toLowerCase());
-        }).findFirst().get();
+        Project project = projectsComboBox.getValue();
 
         if (project != null) {
             this.projectVersions.clear();
             this.projectVersions = bugrapRepository.findProjectVersions(project);
             listVersions.clear();
-            this.projectVersions.forEach(version -> {
-                listVersions.add(version.getVersion());
-            });
 
+            listVersions.addAll(this.projectVersions);
             selectVersion.setItems(listVersions);
             selectVersion.setValue(listVersions.get(0));
         }
     }
 
     private void setValueForProjectAndVersionWithoutClickEvents(Set<ProjectVersion> projectVersions,
-                                                                Set<Project> allProjects,
-                                                                ArrayList<String> listVersions) {
+                                                                Set<Project> allProjects) {
 
         this.setValueToVersionProject(allProjects);
         String selectVersionValue = String.valueOf(selectVersion.getValue());
@@ -371,17 +363,17 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
     }
 
     private void filterReportByProject(Set<Project> allProjects,
-                                       ArrayList<String> listVersions) {
+                                       ArrayList<ProjectVersion> listVersions) {
         projectsComboBox.addValueChangeListener(
                 e -> {
                     this.setValueToVersionProject(allProjects);
-                    this.filterReportByProjectAndVersion(e.getValue().toString(), listVersions.get(0));
+                    this.filterReportByProjectAndVersion(e.getValue().toString(), listVersions.get(0).toString());
                     this.showStatusDistributionBar(0, 0, 0);
                 });
     }
 
-    private  List<org.vaadin.bugrap.domain.entities.Report>  checkReportListFilterByProject (String projectSelected,
-                                                 String version) {
+    private  List<org.vaadin.bugrap.domain.entities.Report> getReportListFilterByProject(String projectSelected,
+                                                                                         String version) {
         Set<org.vaadin.bugrap.domain.entities.Report> reports
                 = this.listReports(null, null, bugrapRepository);
 
@@ -396,42 +388,38 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         reportTable.setItems(reportListFilterByProjectAndVersion);
         this.setVisibleOverviewReport();
     }
+
     private void filterReportByProjectAndVersion(String projectSelected, String version) {
 //        Set<org.vaadin.bugrap.domain.entities.Report> reports
 //                = this.listReports(null, null, bugrapRepository);
 //
         List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject =
-                this.checkReportListFilterByProject(projectSelected, version);
+                this.getReportListFilterByProject(projectSelected, version);
 //            // version
-        if (!reportListFilterByProject.isEmpty()) {
-            reportListFilterByProjectAndVersion = reportListFilterByProject
-                    .stream()
-                    .filter(rl ->
-                            rl.getVersion() != null)
-                    .filter(listReport -> listReport.getVersion().getVersion().equalsIgnoreCase(version))
-                    .collect(Collectors.toList());
-            this.setValueForReportTable();
-        }
+        reportListFilterByProjectAndVersion = reportListFilterByProject
+                .stream()
+                .filter(rl ->
+                        rl.getVersion() != null)
+                .filter(listReport -> listReport.getVersion().getVersion().equalsIgnoreCase(version))
+                .collect(Collectors.toList());
+        this.setValueForReportTable();
     }
 
     private void filterReportByVersionWhenClickSelectReportList() {
         selectVersion.addValueChangeListener(version -> {
             String projectSelected = projectsComboBox.getValue().toString();
             String projectVersionSelected = String.valueOf(version.getValue());
-            this.checkReportListFilterByProject(projectSelected, version.toString());
 
             List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject =
-                    this.checkReportListFilterByProject(projectSelected, version.toString());
+                    this.getReportListFilterByProject(projectSelected, version.toString());
 //            // version
-            if (!reportListFilterByProject.isEmpty()) {
-                reportListFilterByProjectAndVersion = reportListFilterByProject
-                        .stream()
-                        .filter(rl -> rl.getVersion() != null
-                                && !StringUtils.isEmpty(rl.getVersion().getVersion())
-                                && rl.getVersion().getVersion().toLowerCase().equals(projectVersionSelected.toLowerCase()))
-                        .collect(Collectors.toList());
-                this.setValueForReportTable();
-            }
+            reportListFilterByProjectAndVersion = reportListFilterByProject
+                    .stream()
+                    .filter(rl -> rl.getVersion() != null
+                            && !StringUtils.isEmpty(rl.getVersion().getVersion())
+                            && rl.getVersion().getVersion().toLowerCase().equals(projectVersionSelected.toLowerCase()))
+                    .collect(Collectors.toList());
+            this.setValueForReportTable();
             this.showStatusDistributionBar(0, 0, 0);
         });
     }
