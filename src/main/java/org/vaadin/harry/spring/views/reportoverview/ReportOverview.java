@@ -28,6 +28,8 @@ import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.templatemodel.TemplateModel;
 import components.ProgressBar;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -534,7 +536,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         this.clickUpdateBtnForOneRow(binderReport, currentVersion);
     }
 
-    private void checkFieldsAreDiff (boolean isAllPrioritySame , boolean isAllStatusSame, boolean isAllTypeSame ) {
+    private boolean[] checkFieldsAreDiff (boolean isAllPrioritySame , boolean isAllStatusSame, boolean isAllTypeSame ) {
         for (int i = 0; i < reportsUpdated.size() - 1; i++) {
             for (int k = i + 1; k < reportsUpdated.size(); k++) {
 
@@ -558,6 +560,12 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
                 }
             }
         }
+        boolean isStatusTemp[] = new boolean[3];
+        isStatusTemp[0] = isAllPrioritySame;
+        isStatusTemp[1] = isAllStatusSame;
+        isStatusTemp[2] = isAllTypeSame;
+
+        return isStatusTemp;
     }
 
     private void checkFieldsHasSameValueAndGiveValues (
@@ -594,7 +602,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         }
         else {
             btnUpdate.setVisible(true);
-
             // handle Revert button (function) for multi rows
             this.clickRevertBtnForMultiRows(firstReport);
         }
@@ -636,8 +643,10 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         versionSelected.setItems(this.projectVersions.get());
         boolean isAllPrioritySame = true, isAllStatusSame = true, isAllTypeSame = true;
 
-        this.checkFieldsAreDiff(isAllPrioritySame, isAllStatusSame, isAllTypeSame);
-
+        boolean []statusFieldsDiff = this.checkFieldsAreDiff(isAllPrioritySame, isAllStatusSame, isAllTypeSame);
+        isAllPrioritySame = statusFieldsDiff[0];
+        isAllStatusSame = statusFieldsDiff[1];
+        isAllTypeSame =  statusFieldsDiff[2];
         // set value to version field
         versionSelected.setValue(firstReport.getVersion());
 
@@ -652,7 +661,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         this.checkAuthorAndDescritionAreDiff(isSameAuthor, isSameDescription, firstReport);
 
 //
-        //binding data to 4 fields Priority, Status, Type and Version
+        // binding data to 4 fields Priority, Status, Type and Version
         Binder<Report> binderReport = new Binder<Report>();
         this.bindingDataForFileds(binderReport);
 
