@@ -24,7 +24,7 @@ public class OverviewNewtag extends PolymerTemplate<OverviewNewtag.OverviewNewta
      * Creates a new OverviewNewtag.
      */
     public OverviewNewtag() {
-        // You can initialise any data required for the connected UI components here.
+        // You can initialise any data required for the connected UI org.vaadin.harry.spring.components here.
     }
 
     /**
