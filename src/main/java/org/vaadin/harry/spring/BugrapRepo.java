@@ -13,4 +13,8 @@ public class BugrapRepo {
         return bugrapRepository;
     }
 
+    public static void clear() {
+        bugrapRepository = null;
+    }
+
 }
