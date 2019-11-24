@@ -113,11 +113,6 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         // find all projects
         Set<Project> allProjects = BugrapRepo.getRepo().findProjects();
 
-        ArrayList<String> listProjects = new ArrayList<>();
-        allProjects.forEach(pr -> {
-            listProjects.add(pr.getName());
-        });
-
         //set items to project combo box
         projectsComboBox.setItems(allProjects);
         projectsComboBox.setValue(allProjects.stream().findFirst().get());
@@ -345,7 +340,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
         this.setValueToVersionProject(allProjects);
         String selectVersionValue = String.valueOf(selectVersion.getValue());
-        this.filterReportByProjectAndVersion(projectsComboBox.getValue().toString(), selectVersionValue);
+        this.filterReportByProjectAndVersion(projectsComboBox.getValue(), selectVersionValue);
         this.setVisibleOverviewReport();
     }
 
@@ -354,19 +349,19 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         projectsComboBox.addValueChangeListener(
                 e -> {
                     this.setValueToVersionProject(allProjects);
-                    this.filterReportByProjectAndVersion(e.getValue().toString(), listVersions.get(0).toString());
+                    this.filterReportByProjectAndVersion(e.getValue(), listVersions.get(0).toString());
                     this.showStatusDistributionBar(0, 0, 0);
                 });
     }
 
-    private List<org.vaadin.bugrap.domain.entities.Report> getReportListFilterByProject(String projectSelected,
+    private List<org.vaadin.bugrap.domain.entities.Report> getReportListFilterByProject(Project projectSelected,
                                                                                         String version) {
         Set<org.vaadin.bugrap.domain.entities.Report> reports
                 = this.listReports(null, null, BugrapRepo.getRepo());
 
         return reports.stream()
                 .filter(rl -> rl.getProject() != null)
-                .filter(r -> projectSelected.equalsIgnoreCase(r.getProject().getName()))
+                .filter(r -> projectSelected.getName().equalsIgnoreCase(r.getProject().getName()))
                 .collect(Collectors.toList());
     }
 
@@ -376,7 +371,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
         this.setVisibleOverviewReport();
     }
 
-    public void filterReportByProjectAndVersion(String projectSelected, String version) {
+    public void filterReportByProjectAndVersion(Project projectSelected, String version) {
         List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject =
                 this.getReportListFilterByProject(projectSelected, version);
         // version
@@ -394,7 +389,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
             try {
                 binderReport.writeBean(reportDetail.getReportUpdated());
                 reportDetail.setReportUpdated(BugrapRepo.getRepo().save(reportDetail.getReportUpdated()));
-                this.filterReportByProjectAndVersion(reportDetail.getReportUpdated().getProject().toString(), currentVersion);
+                this.filterReportByProjectAndVersion(reportDetail.getReportUpdated().getProject(), currentVersion);
                 reportDetail.getDialogUpdateSucceed().open();
 
             } catch (ValidationException ex) {
@@ -405,7 +400,7 @@ public class ReportOverview extends PolymerTemplate<ReportOverview.ReportOvervie
 
     private void filterReportByVersionWhenClickSelectReportList() {
         selectVersion.addValueChangeListener(version -> {
-            String projectSelected = projectsComboBox.getValue().toString();
+            Project projectSelected = projectsComboBox.getValue();
             String projectVersionSelected = String.valueOf(version.getValue());
 
             List<org.vaadin.bugrap.domain.entities.Report> reportListFilterByProject =
