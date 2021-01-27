@@ -2,9 +2,10 @@
   "name": "no-name",
   "license": "UNLICENSED",
   "dependencies": {
+    "@polymer/iron-pages": "^3.0.1",
     "@polymer/polymer": "3.2.0",
-    "@webcomponents/webcomponentsjs": "^2.2.10",
-    "@vaadin/flow-deps": "./target/frontend"
+    "@vaadin/flow-deps": "./target/frontend",
+    "@webcomponents/webcomponentsjs": "^2.2.10"
   },
   "devDependencies": {
     "webpack": "4.30.0",
@@ -16,5 +17,5 @@
     "raw-loader": "3.0.0",
     "compression-webpack-plugin": "3.0.0"
   },
-  "vaadinAppPackageHash": "b6f713b6443c14896238726a4615f564757d0943e80d2783427d206798647bc5"
+  "vaadinAppPackageHash": "3904e01b134f8e5618e77cab8736de6fe55399b566317c13049553fff851d289"
 }

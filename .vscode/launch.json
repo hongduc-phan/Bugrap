@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Application",
+            "request": "launch",
+            "mainClass": "org.vaadin.harry.spring.Application",
+            "projectName": "bugrap-springboot"
+        }
+    ]
+}
